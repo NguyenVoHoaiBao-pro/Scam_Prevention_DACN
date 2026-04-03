@@ -8,6 +8,50 @@ import requests
 # Load OAuth config
 with open(os.path.join(os.path.dirname(__file__), '..', 'config.json')) as f:
     oauth_config = json.load(f)
+
+
+def load_valid_users():
+    users_path = os.path.join(os.path.dirname(__file__), '..', 'valid_users.json')
+    with open(users_path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+@app.route("/api/auth/login", methods=["POST"])
+def email_password_login():
+    data = request.get_json(silent=True) or {}
+    email = (data.get("email") or "").strip().lower()
+    username = (data.get("username") or "").strip().lower()
+    password = data.get("password") or ""
+
+    if not password or (not email and not username):
+        return jsonify({"error": "email/username and password are required"}), 400
+
+    valid_users = load_valid_users()
+    matched_user = None
+
+    for user in valid_users:
+        user_email = (user.get("email") or "").strip().lower()
+        user_username = (user.get("username") or "").strip().lower()
+        user_password = user.get("password") or ""
+
+        identity_match = (email and email == user_email) or (username and username == user_username)
+        if identity_match and password == user_password:
+            matched_user = {
+                "id": user.get("id"),
+                "username": user.get("username"),
+                "email": user.get("email")
+            }
+            break
+
+    if not matched_user:
+        return jsonify({"error": "Invalid credentials"}), 401
+
+    return jsonify({
+        "message": "Login successful",
+        "user": matched_user
+    })
+
+
 @app.route("/api/auth/google/login")
 def google_login():
     params = {
