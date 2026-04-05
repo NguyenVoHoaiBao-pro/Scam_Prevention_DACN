@@ -1,4 +1,67 @@
+import { useMemo, useState } from "react";
+
 function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+
+  const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
+  const loginEndpoint = useMemo(
+    () => `${apiBaseUrl}/api/auth/login`,
+    [apiBaseUrl],
+  );
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setErrorMessage("");
+    setSuccessMessage("");
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch(loginEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          rememberMe,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Login failed. Please try again.");
+      }
+
+      if (rememberMe) {
+        localStorage.setItem("authUser", JSON.stringify(result.user || {}));
+      } else {
+        localStorage.removeItem("authUser");
+      }
+
+      setSuccessMessage(result.message || "Login successful");
+    } catch (error) {
+      setErrorMessage(error.message || "Unable to login right now.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const startGoogleLogin = () => {
+    window.location.href = `${apiBaseUrl}/api/auth/google/login`;
+  };
+
+  const startFacebookLogin = () => {
+    window.location.href = `${apiBaseUrl}/api/auth/facebook/login`;
+  };
+
   return (
     <>
       <main className="relative flex min-h-screen flex-grow items-center justify-center overflow-hidden bg-surface px-4 py-12 text-on-surface selection:bg-primary-fixed">
@@ -44,7 +107,7 @@ function Login() {
             </div>
 
             <div className="p-8">
-              <form className="space-y-6">
+              <form className="space-y-6" onSubmit={handleSubmit}>
                 <div className="space-y-2">
                   <label
                     htmlFor="email"
@@ -69,6 +132,8 @@ function Login() {
                       type="email"
                       required
                       placeholder="name@example.com"
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
                       className="h-16 w-full rounded-lg border-none bg-surface-container-highest pl-12 pr-4 text-lg transition-all focus:ring-[3px] focus:ring-primary-fixed"
                     />
                   </div>
@@ -95,21 +160,24 @@ function Login() {
                     <input
                       id="password"
                       name="password"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       required
                       placeholder="••••••••"
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
                       className="h-16 w-full rounded-lg border-none bg-surface-container-highest pl-12 pr-12 text-lg transition-all focus:ring-[3px] focus:ring-primary-fixed"
                     />
 
                     <button
                       type="button"
+                      onClick={() => setShowPassword((prevState) => !prevState)}
                       className="absolute inset-y-0 right-0 flex items-center pr-4 text-outline hover:text-primary"
                     >
                       <span
                         className="material-symbols-outlined"
-                        data-icon="visibility"
+                        data-icon={showPassword ? "visibility_off" : "visibility"}
                       >
-                        visibility
+                        {showPassword ? "visibility_off" : "visibility"}
                       </span>
                     </button>
                   </div>
@@ -119,6 +187,8 @@ function Login() {
                   <label className="group flex cursor-pointer items-center space-x-3">
                     <input
                       type="checkbox"
+                      checked={rememberMe}
+                      onChange={(event) => setRememberMe(event.target.checked)}
                       className="h-6 w-6 rounded border-outline-variant text-primary focus:ring-primary-fixed"
                     />
                     <span className="text-lg text-on-surface-variant transition-colors group-hover:text-on-surface">
@@ -134,11 +204,24 @@ function Login() {
                   </a>
                 </div>
 
+                {errorMessage && (
+                  <p className="rounded-lg bg-red-50 px-4 py-3 text-base font-semibold text-red-700">
+                    {errorMessage}
+                  </p>
+                )}
+
+                {successMessage && (
+                  <p className="rounded-lg bg-green-50 px-4 py-3 text-base font-semibold text-green-700">
+                    {successMessage}
+                  </p>
+                )}
+
                 <button
                   type="submit"
+                  disabled={isSubmitting}
                   className="signature-gradient flex h-16 w-full items-center justify-center gap-3 rounded-xl text-xl font-bold text-white shadow-lg shadow-primary/20 transition-transform active:scale-[0.98]"
                 >
-                  Sign In
+                  {isSubmitting ? "Signing In..." : "Sign In"}
                   <span
                     className="material-symbols-outlined"
                     data-icon="arrow_forward"
@@ -163,6 +246,7 @@ function Login() {
               <div className="grid grid-cols-2 gap-4">
                 <button
                   type="button"
+                  onClick={startGoogleLogin}
                   className="flex h-16 items-center justify-center gap-3 rounded-xl border border-outline-variant/20 bg-surface-container text-lg font-semibold text-on-surface transition-colors hover:bg-surface-container-high"
                 >
                   <img
@@ -175,6 +259,7 @@ function Login() {
 
                 <button
                   type="button"
+                  onClick={startFacebookLogin}
                   className="flex h-16 items-center justify-center gap-3 rounded-xl border border-outline-variant/20 bg-surface-container text-lg font-semibold text-on-surface transition-colors hover:bg-surface-container-high"
                 >
                   <img
