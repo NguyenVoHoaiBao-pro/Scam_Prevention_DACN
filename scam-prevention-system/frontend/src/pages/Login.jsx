@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 
-function Login() {
+function Login({ onLoginSuccess }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -47,6 +47,12 @@ function Login() {
       }
 
       setSuccessMessage(result.message || "Login successful");
+      if (onLoginSuccess) {
+          
+          setTimeout(() => {
+              onLoginSuccess();
+          }, 1000); 
+        } 
     } catch (error) {
       setErrorMessage(error.message || "Unable to login right now.");
     } finally {

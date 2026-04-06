@@ -8,8 +8,8 @@ export default function CommunityScamReport() {
                 <div className="flex justify-between items-center w-full px-8 py-6 max-w-screen-2xl mx-auto h-20">
                     <div className="flex items-center gap-2">
                         <span className="material-symbols-outlined text-blue-900 dark:text-blue-100 text-3xl" data-icon="shield">shield</span>
-                        <div className="text-2xl font-bold tracking-tight text-blue-900 dark:text-blue-100 font-headline uppercase">
-                            The Guardian's Lens
+                        <div className="text-3xl font-extrabold tracking-tight text-primary">
+                            Fraud Scanner AI
                         </div>
                     </div>
                     <div className="hidden md:flex items-center gap-12">
