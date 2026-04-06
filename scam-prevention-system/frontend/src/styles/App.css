@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@theme {
+  /* Định nghĩa lại các màu từ file HTML gốc của bạn */
+  --color-primary: #00288e;
+  --color-surface: #f7f9fb;
+  --color-on-surface: #191c1e;
+  --color-on-surface-variant: #444653;
+  --color-secondary-container: #c3ccfe;
+  --color-tertiary-container: #9b000c;
+  --color-outline-variant: #c4c5d5;
+  
+  /* Định nghĩa Font */
+  --font-headline: "Public Sans", sans-serif;
+  --font-body: "Lexend", sans-serif;
+}
+
+/* Các lớp bổ trợ cho Card và Icon */
+@utility article-card-shadow {
+  box-shadow: 0 4px 20px rgba(0, 40, 142, 0.05);
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  display: inline-block;
+  vertical-align: middle;
+}
