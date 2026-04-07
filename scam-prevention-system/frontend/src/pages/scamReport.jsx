@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import '../styles.css';
+import { useNavigate } from 'react-router-dom';
 
 export default function CommunityScamReport() {
+    const navigate = useNavigate();
     // 1. Quản lý State
     const [warnings, setWarnings] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -42,8 +44,7 @@ export default function CommunityScamReport() {
 
     // 4. Hàm xử lý nút Scan Your Message
     const handleGoToScan = () => {
-        // Chuyển hướng sang trang Scan. Nếu bạn dùng react-router, thay bằng navigate('/scan')
-        window.location.href = "/scan";
+        navigate('/scan');
     };
 
     return (

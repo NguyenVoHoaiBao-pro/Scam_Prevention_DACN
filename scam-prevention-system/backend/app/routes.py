@@ -6,6 +6,8 @@ from urllib.parse import urlencode
 import requests
 import pymysql
 from flask import jsonify
+import joblib
+import os
 
 # Load OAuth config
 with open(os.path.join(os.path.dirname(__file__), '..', 'config.json')) as f:
@@ -144,18 +146,45 @@ def health():
         "status": "ok"
     })
 
+# ==========================================
+# LOAD FILE AI MODEL
+# ==========================================
+# Đường dẫn chỉ đến file scam_model.pkl bạn vừa tạo
+MODEL_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'models_saved', 'scam_model.pkl')
+
+try:
+    scam_model = joblib.load(MODEL_PATH)
+    print("Đã tải thành công AI Model!")
+except Exception as e:
+    scam_model = None
+    print(f"Lỗi tải AI Model: {str(e)}. Hệ thống sẽ dùng từ khóa mặc định.")
+
+# ==========================================
+# API ENDPOINT: Quét văn bản bằng AI
+# ==========================================
 @app.route("/api/detect-text", methods=["POST"])
 def detect_text():
     data = request.get_json()
     text = data.get("text", "")
 
-    suspicious_keywords = ["otp", "chuyển khoản", "trúng thưởng", "click link", "xác minh tài khoản"]
-    is_scam = any(keyword.lower() in text.lower() for keyword in suspicious_keywords)
+    if not text.strip():
+        return jsonify({"input_text": text, "is_scam": False, "message": "Vui lòng nhập nội dung."})
+
+    is_scam = False
+
+    if scam_model:
+        # DÙNG AI ĐỂ DỰ ĐOÁN (PREDICT)
+        prediction = scam_model.predict([text])[0] # AI trả về 1 hoặc 0
+        is_scam = bool(prediction == 1)
+    else:
+        # Nếu AI lỗi, dùng lại logic từ khóa cũ làm phương án dự phòng
+        suspicious_keywords = ["otp", "chuyển khoản", "trúng thưởng", "click link", "xác minh tài khoản"]
+        is_scam = any(keyword.lower() in text.lower() for keyword in suspicious_keywords)
 
     return jsonify({
         "input_text": text,
         "is_scam": is_scam,
-        "message": "Scam detected!" if is_scam else "Text seems safe."
+        "message": "Phát hiện nội dung có dấu hiệu lừa đảo!" if is_scam else "Văn bản an toàn, không có dấu hiệu lừa đảo."
     })
 
 def get_db_connection():
@@ -166,38 +195,49 @@ def get_db_connection():
         database='scam_prevention_db',
         cursorclass=pymysql.cursors.DictCursor
     )
-@app.route("/api/warnings", methods=["GET"])
-def get_warnings():
+@app.route("/api/warnings", methods=["GET", "POST"])
+def handle_warnings():
     connection = None
     try:
-        # 1. Mở kết nối đến DB
         connection = get_db_connection()
         with connection.cursor() as cursor:
-            # 2. Truy vấn dữ liệu (Sắp xếp từ mới nhất đến cũ nhất)
-            sql = "SELECT id, title, content, risk_level, created_at FROM warnings ORDER BY created_at DESC"
-            cursor.execute(sql)
-            warnings = cursor.fetchall()
+            # NẾU LÀ GỬI BÁO CÁO MỚI TỪ TRANG SCAN
+            if request.method == "POST":
+                data = request.get_json()
+                title = data.get("title")
+                content = data.get("content")
+                risk_level = data.get("risk_level", "High")
 
-        # 3. Chuyển đổi định dạng thời gian (datetime) sang chuỗi (string) để tránh lỗi JSON
-        for w in warnings:
-            if w['created_at']:
-                w['created_at'] = w['created_at'].strftime("%Y-%m-%d %H:%M:%S")
+                sql = "INSERT INTO warnings (title, content, risk_level) VALUES (%s, %s, %s)"
+                cursor.execute(sql, (title, content, risk_level))
+                connection.commit()
 
-        # 4. Trả về Frontend
-        return jsonify({
-            "status": "success",
-            "data": warnings,
-            "message": "Lấy dữ liệu MySQL thành công!"
-        }), 200
+                return jsonify({
+                    "status": "success",
+                    "message": "Đã lưu cảnh báo vào cơ sở dữ liệu!"
+                }), 201
+
+            # NẾU LÀ LẤY DANH SÁCH CHO TRANG REPORT
+            elif request.method == "GET":
+                sql = "SELECT id, title, content, risk_level, created_at FROM warnings ORDER BY created_at DESC"
+                cursor.execute(sql)
+                warnings = cursor.fetchall()
+
+                for w in warnings:
+                    if w['created_at']:
+                        w['created_at'] = w['created_at'].strftime("%Y-%m-%d %H:%M:%S")
+
+                return jsonify({
+                    "status": "success",
+                    "data": warnings
+                }), 200
 
     except Exception as e:
-        # Xử lý lỗi nếu database sập hoặc sai mật khẩu
         return jsonify({
             "status": "error",
             "message": f"Lỗi Database: {str(e)}"
         }), 500
 
     finally:
-        # 5. Luôn nhớ đóng kết nối DB để không bị tràn bộ nhớ
         if connection and connection.open:
             connection.close()
