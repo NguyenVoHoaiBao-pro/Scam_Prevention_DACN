@@ -1,9 +1,15 @@
 import React from 'react';
+<<<<<<< HEAD
 import '../styles.css';
 import '../styles/App.css'; 
 import { Link } from 'react-router-dom';
 
 const Awareness = ({ onLogout }) => {
+=======
+import '../index.css';
+
+const Awareness = () => {
+>>>>>>> HomePage
   return (
     <div className="bg-surface font-body text-on-surface min-h-screen">
       {/* TopNavBar */}
@@ -12,6 +18,7 @@ const Awareness = ({ onLogout }) => {
           <span className="text-2xl font-extrabold text-primary font-headline tracking-tight">Guardian Lens</span>
           <div className="hidden md:flex gap-6 items-center">
             <a className="text-on-surface-variant font-headline font-bold hover:bg-blue-50 px-3 py-2 rounded-lg" href="#">Scan Content</a>
+<<<<<<< HEAD
             <Link to="/report" className="text-on-surface-variant font-headline font-bold hover:bg-blue-50 px-3 py-2 rounded-lg">Report Scam</Link>
             <Link to="/awareness" className="text-primary border-b-4 border-primary font-headline font-bold px-3 py-2">Awareness Hub</Link>
           </div>
@@ -24,6 +31,14 @@ const Awareness = ({ onLogout }) => {
             <span className="material-symbols-outlined text-3xl" data-icon="logout">logout</span>
             <span className="hidden md:inline text-sm font-medium">Logout</span>
           </button>
+=======
+            <a className="text-on-surface-variant font-headline font-bold hover:bg-blue-50 px-3 py-2 rounded-lg" href="#">Report Scam</a>
+            <a className="text-primary border-b-4 border-primary font-headline font-bold px-3 py-2" href="#">Awareness Hub</a>
+          </div>
+        </div>
+        <div className="flex items-center gap-4">
+          <span className="material-symbols-outlined text-primary text-3xl cursor-pointer">account_circle</span>
+>>>>>>> HomePage
         </div>
       </nav>
 

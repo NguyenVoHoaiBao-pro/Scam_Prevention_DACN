@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Awareness Hub | Guardian Lens</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;700;800;900&amp;family=Lexend:wght@400;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-surface": "#191c1e",
+                    "on-secondary-container": "#4c5680",
+                    "tertiary-fixed": "#ffdad6",
+                    "surface-container-low": "#f2f4f6",
+                    "primary-fixed-dim": "#b8c4ff",
+                    "surface-dim": "#d8dadc",
+                    "on-primary-fixed-variant": "#173bab",
+                    "on-tertiary": "#ffffff",
+                    "on-tertiary-fixed": "#410002",
+                    "on-surface-variant": "#444653",
+                    "on-tertiary-fixed-variant": "#93000b",
+                    "primary": "#00288e",
+                    "surface-container-lowest": "#ffffff",
+                    "outline": "#757684",
+                    "tertiary-container": "#9b000c",
+                    "on-secondary-fixed": "#0e1840",
+                    "on-primary-fixed": "#001453",
+                    "on-error-container": "#93000a",
+                    "on-secondary-fixed-variant": "#3b446e",
+                    "surface": "#f7f9fb",
+                    "on-secondary": "#ffffff",
+                    "surface-variant": "#e0e3e5",
+                    "secondary-container": "#c3ccfe",
+                    "outline-variant": "#c4c5d5",
+                    "background": "#f7f9fb",
+                    "secondary-fixed": "#dde1ff",
+                    "secondary": "#525c87",
+                    "on-error": "#ffffff",
+                    "surface-container-high": "#e6e8ea",
+                    "on-tertiary-container": "#ffa398",
+                    "tertiary-fixed-dim": "#ffb4ab",
+                    "primary-container": "#1e40af",
+                    "on-background": "#191c1e",
+                    "error-container": "#ffdad6",
+                    "secondary-fixed-dim": "#bbc4f6",
+                    "inverse-primary": "#b8c4ff",
+                    "surface-bright": "#f7f9fb",
+                    "on-primary-container": "#a8b8ff",
+                    "surface-container": "#eceef0",
+                    "inverse-on-surface": "#eff1f3",
+                    "surface-tint": "#3755c3",
+                    "tertiary": "#700006",
+                    "on-primary": "#ffffff",
+                    "inverse-surface": "#2d3133",
+                    "surface-container-highest": "#e0e3e5",
+                    "error": "#ba1a1a",
+                    "primary-fixed": "#dde1ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Public Sans"],
+                    "body": ["Lexend"],
+                    "label": ["Lexend"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .article-card-shadow {
+            box-shadow: 0 4px 20px rgba(0, 40, 142, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface">
+<!-- TopNavBar -->
+<nav class="bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-xl flex justify-between items-center w-full px-6 h-20 shadow-sm dark:shadow-none docked full-width top-0 sticky z-50">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-extrabold text-blue-900 dark:text-blue-50 font-headline tracking-tight">Guardian Lens</span>
+<div class="hidden md:flex gap-6 items-center">
+<a class="text-slate-500 dark:text-slate-400 font-headline font-bold hover:bg-blue-50 transition-all px-3 py-2 rounded-lg" href="#">Scan Content</a>
+<a class="text-slate-500 dark:text-slate-400 font-headline font-bold hover:bg-blue-50 transition-all px-3 py-2 rounded-lg" href="#">Report Scam</a>
+<a class="text-blue-900 dark:text-blue-50 border-b-4 border-blue-900 font-headline font-bold px-3 py-2" href="#">Awareness Hub</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-blue-900 dark:text-blue-400 text-3xl cursor-pointer transition-all duration-300 active:scale-95" data-icon="account_circle">account_circle</span>
+</div>
+</nav>
+<main class="max-w-4xl mx-auto px-6 py-12">
+<!-- Header Section -->
+<header class="mb-16">
+<h1 class="text-5xl font-black font-headline text-primary mb-4 tracking-tight">Awareness Hub</h1>
+<p class="text-[18px] text-on-surface-variant max-w-2xl leading-relaxed">
+                Stay informed with the latest fraud intelligence. Our Digital Concierge curates real-time alerts to keep you and your family safe from evolving digital threats.
+            </p>
+</header>
+<!-- Vertical Feed -->
+<div class="space-y-12">
+<!-- Article Card 1 -->
+<article class="bg-surface-container-lowest rounded-xl article-card-shadow p-8 border border-outline-variant/20 transition-transform duration-300 hover:scale-[1.01]">
+<div class="flex justify-between items-center mb-6">
+<span class="bg-secondary-container text-on-secondary-fixed font-label font-bold px-4 py-1.5 rounded-full text-sm uppercase tracking-wider">SMS Scam</span>
+<span class="text-on-surface-variant font-label text-sm">2 days ago</span>
+</div>
+<h2 class="text-[28px] font-bold font-headline text-on-surface mb-4 leading-tight">Warning: Fake Delivery Packages Requiring Payment</h2>
+<p class="text-[18px] text-on-surface-variant mb-8 leading-relaxed">
+                    Scammers are sending SMS messages claiming a package is held due to an unpaid shipping fee. Do not click the link. This tactic aims to harvest credit card details under the guise of a minor administrative charge.
+                </p>
+<div class="flex items-center justify-between pt-6 border-t border-surface-container-high">
+<div class="flex gap-4">
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-surface-container-low transition-all text-primary font-bold">
+<span class="material-symbols-outlined" data-icon="thumb_up">thumb_up</span>
+<span>142</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-surface-container-low transition-all text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="thumb_down">thumb_down</span>
+</button>
+</div>
+<a class="text-primary font-bold text-lg hover:underline flex items-center gap-1" href="#">
+                        Read full article <span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</a>
+</div>
+</article>
+<!-- Article Card 2 -->
+<article class="bg-surface-container-lowest rounded-xl article-card-shadow p-8 border border-outline-variant/20 transition-transform duration-300 hover:scale-[1.01]">
+<div class="flex justify-between items-center mb-6">
+<span class="bg-tertiary-container text-on-tertiary font-label font-bold px-4 py-1.5 rounded-full text-sm uppercase tracking-wider animate-pulse">AI Voice Clone</span>
+<span class="text-on-surface-variant font-label text-sm">2 days ago</span>
+</div>
+<h2 class="text-[28px] font-bold font-headline text-on-surface mb-4 leading-tight">Alert: AI Voice Clone Phone Calls</h2>
+<p class="text-[18px] text-on-surface-variant mb-8 leading-relaxed">
+                    Criminals are using AI to mimic relatives' voices to ask for urgent money transfers. Always verify through another channel. These deepfake audio attacks are highly convincing and often target grandparents by mimicking grandchildren in distress.
+                </p>
+<div class="flex items-center justify-between pt-6 border-t border-surface-container-high">
+<div class="flex gap-4">
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-surface-container-low transition-all text-primary font-bold">
+<span class="material-symbols-outlined" data-icon="thumb_up" style="font-variation-settings: 'FILL' 1;">thumb_up</span>
+<span>389</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-surface-container-low transition-all text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="thumb_down">thumb_down</span>
+</button>
+</div>
+<a class="text-primary font-bold text-lg hover:underline flex items-center gap-1" href="#">
+                        Read full article <span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</a>
+</div>
+</article>
+<!-- Article Card 3 -->
+<article class="bg-surface-container-lowest rounded-xl article-card-shadow p-8 border border-outline-variant/20 transition-transform duration-300 hover:scale-[1.01]">
+<div class="flex justify-between items-center mb-6">
+<span class="bg-secondary-container text-on-secondary-fixed font-label font-bold px-4 py-1.5 rounded-full text-sm uppercase tracking-wider">Bank Fraud</span>
+<span class="text-on-surface-variant font-label text-sm">2 days ago</span>
+</div>
+<h2 class="text-[28px] font-bold font-headline text-on-surface mb-4 leading-tight">Urgent: New Tax Refund Phishing Emails</h2>
+<p class="text-[18px] text-on-surface-variant mb-8 leading-relaxed">
+                    Fraudsters are emailing victims claiming a tax refund is ready. This is a tactic to steal bank credentials. The emails often use official government logos and urgent language to trick users into logging into a cloned banking portal.
+                </p>
+<div class="flex items-center justify-between pt-6 border-t border-surface-container-high">
+<div class="flex gap-4">
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-surface-container-low transition-all text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="thumb_up">thumb_up</span>
+<span>56</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-surface-container-low transition-all text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="thumb_down">thumb_down</span>
+</button>
+</div>
+<a class="text-primary font-bold text-lg hover:underline flex items-center gap-1" href="#">
+                        Read full article <span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</a>
+</div>
+</article>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 w-full h-24 rounded-t-3xl bg-white dark:bg-slate-950 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] flex justify-around items-center pb-safe px-4 z-50">
+<div class="flex flex-col items-center justify-center text-slate-400 font-label text-[14px] font-bold">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Home</span>
+</div>
+<div class="flex flex-col items-center justify-center text-blue-900 dark:text-blue-400 scale-110 font-label text-[14px] font-bold">
+<span class="material-symbols-outlined" data-icon="newspaper" style="font-variation-settings: 'FILL' 1;">newspaper</span>
+<span>Awareness</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 font-label text-[14px] font-bold">
+<span class="material-symbols-outlined" data-icon="lock">lock</span>
+<span>Vault</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 font-label text-[14px] font-bold">
+<span class="material-symbols-outlined" data-icon="emergency_home">emergency_home</span>
+<span>Alerts</span>
+</div>
+</nav>
+<!-- Footer -->
+<footer class="bg-slate-100 dark:bg-slate-900 w-full py-12 px-8 mt-24">
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start space-y-8 md:space-y-0">
+<div class="max-w-md">
+<span class="font-['Public_Sans'] font-black uppercase text-blue-900 text-2xl block mb-4">Guardian Lens</span>
+<p class="text-slate-500 font-body text-lg leading-relaxed">© 2024 The Guardian's Lens. Your Security, Our Authority. Empowering elders with AI-driven digital protection.</p>
+</div>
+<div class="grid grid-cols-2 gap-x-12 gap-y-4">
+<a class="text-slate-500 hover:text-blue-900 dark:hover:text-blue-200 font-label text-lg" href="#">Privacy Vault</a>
+<a class="text-slate-500 hover:text-blue-900 dark:hover:text-blue-200 font-label text-lg" href="#">Terms of Trust</a>
+<a class="text-slate-500 hover:text-blue-900 dark:hover:text-blue-200 font-label text-lg" href="#">Accessibility</a>
+<a class="text-slate-500 hover:text-blue-900 dark:hover:text-blue-200 font-label text-lg" href="#">Contact Human</a>
+</div>
+</div>
+</footer>
+</body></html>
