@@ -1,1 +1,7 @@
 scam-prevention-system/backend/config.json
+node_modules/
+__pycache__/
+*.pyc
+.env
+dist/
+build/
