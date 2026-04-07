@@ -1,18 +1,21 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-function Login() {
+
+function Register() {
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
 
   const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
-  const loginEndpoint = useMemo(
-    () => `${apiBaseUrl}/api/auth/login`,
+  const registerEndpoint = useMemo(
+    () => `${apiBaseUrl}/api/auth/register`,
     [apiBaseUrl],
   );
 
@@ -20,37 +23,36 @@ function Login() {
     event.preventDefault();
     setErrorMessage("");
     setSuccessMessage("");
+
+    if (password !== confirmPassword) {
+      setErrorMessage("Passwords do not match.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(loginEndpoint, {
+      const response = await fetch(registerEndpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          username,
           email,
           password,
-          rememberMe,
         }),
       });
 
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || "Login failed. Please try again.");
+        throw new Error(result.error || "Registration failed. Please try again.");
       }
 
-      if (rememberMe) {
-        localStorage.setItem("authUser", JSON.stringify(result.user || {}));
-      } else {
-        localStorage.removeItem("authUser");
-      }
-
-      setSuccessMessage(result.message || "Login successful");
-      navigate("/");
+      setSuccessMessage(result.message || "Registration successful");
     } catch (error) {
-      setErrorMessage(error.message || "Unable to login right now.");
+      setErrorMessage(error.message || "Unable to register right now.");
     } finally {
       setIsSubmitting(false);
     }
@@ -96,14 +98,14 @@ function Login() {
             <div className="m-4 flex rounded-xl bg-surface-container-low p-2">
               <button
                 type="button"
-                className="flex-1 rounded-lg bg-surface-container-lowest px-4 py-3 text-lg font-bold text-primary shadow-sm transition-all duration-200"
+                onClick={() => navigate('/login')}
+                className="flex-1 rounded-lg px-4 py-3 text-lg font-bold text-on-surface-variant transition-all duration-200 hover:bg-surface-container-high"
               >
                 Sign In
               </button>
               <button
                 type="button"
-                onClick={() => navigate('/register')}
-                className="flex-1 rounded-lg px-4 py-3 text-lg font-bold text-on-surface-variant transition-all duration-200 hover:bg-surface-container-high"
+                className="flex-1 rounded-lg bg-surface-container-lowest px-4 py-3 text-lg font-bold text-primary shadow-sm transition-all duration-200"
               >
                 Sign Up
               </button>
@@ -111,6 +113,37 @@ function Login() {
 
             <div className="p-8">
               <form className="space-y-6" onSubmit={handleSubmit}>
+                <div className="space-y-2">
+                  <label
+                    htmlFor="username"
+                    className="block px-1 text-sm font-semibold text-on-surface-variant"
+                  >
+                    Username
+                  </label>
+
+                  <div className="group relative">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                      <span
+                        className="material-symbols-outlined text-outline"
+                        data-icon="person"
+                      >
+                        person
+                      </span>
+                    </div>
+
+                    <input
+                      id="username"
+                      name="username"
+                      type="text"
+                      required
+                      placeholder="Username"
+                      value={username}
+                      onChange={(event) => setUsername(event.target.value)}
+                      className="h-16 w-full rounded-lg border-none bg-surface-container-highest pl-12 pr-4 text-lg transition-all focus:ring-[3px] focus:ring-primary-fixed"
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <label
                     htmlFor="email"
@@ -186,25 +219,48 @@ function Login() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <label className="group flex cursor-pointer items-center space-x-3">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={(event) => setRememberMe(event.target.checked)}
-                      className="h-6 w-6 rounded border-outline-variant text-primary focus:ring-primary-fixed"
-                    />
-                    <span className="text-lg text-on-surface-variant transition-colors group-hover:text-on-surface">
-                      Remember me
-                    </span>
+                <div className="space-y-2">
+                  <label
+                    htmlFor="confirmPassword"
+                    className="block px-1 text-sm font-semibold text-on-surface-variant"
+                  >
+                    Confirm Password
                   </label>
 
-                  <a
-                    href="#"
-                    className="text-lg font-semibold text-primary decoration-2 underline-offset-4 hover:underline"
-                  >
-                    Forgot password?
-                  </a>
+                  <div className="group relative">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                      <span
+                        className="material-symbols-outlined text-outline"
+                        data-icon="lock"
+                      >
+                        lock
+                      </span>
+                    </div>
+
+                    <input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      required
+                      placeholder="••••••••"
+                      value={confirmPassword}
+                      onChange={(event) => setConfirmPassword(event.target.value)}
+                      className="h-16 w-full rounded-lg border-none bg-surface-container-highest pl-12 pr-12 text-lg transition-all focus:ring-[3px] focus:ring-primary-fixed"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword((prevState) => !prevState)}
+                      className="absolute inset-y-0 right-0 flex items-center pr-4 text-outline hover:text-primary"
+                    >
+                      <span
+                        className="material-symbols-outlined"
+                        data-icon={showConfirmPassword ? "visibility_off" : "visibility"}
+                      >
+                        {showConfirmPassword ? "visibility_off" : "visibility"}
+                      </span>
+                    </button>
+                  </div>
                 </div>
 
                 {errorMessage && (
@@ -224,7 +280,7 @@ function Login() {
                   disabled={isSubmitting}
                   className="signature-gradient flex h-16 w-full items-center justify-center gap-3 rounded-xl text-xl font-bold text-white shadow-lg shadow-primary/20 transition-transform active:scale-[0.98]"
                 >
-                  {isSubmitting ? "Signing In..." : "Sign In"}
+                  {isSubmitting ? "Signing Up..." : "Sign Up"}
                   <span
                     className="material-symbols-outlined"
                     data-icon="arrow_forward"
@@ -322,4 +378,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default Register;
