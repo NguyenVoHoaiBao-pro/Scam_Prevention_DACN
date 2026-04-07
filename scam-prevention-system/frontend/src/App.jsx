@@ -4,6 +4,7 @@ import Register from "./pages/Register";
 import HomePage from "./pages/HomePage";
 import Awareness from './pages/Awareness';
 import ScamReport from './pages/scamReport';
+import ScanContent from "./pages/ScanContent";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/scam-report" element={<ScamReport />} />
+        <Route path="/scan" element={<ScanContent />} />
         <Route path="/awareness" element={<Awareness />} />
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
@@ -19,23 +21,4 @@ function App() {
 }
 
 export default App;
-/*
 
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"; 
-import Report from "./pages/scamReport";
-import Awareness from './pages/Awareness';
-import Login from "./pages/Login";
-function App() {
-  return (
-      <Routes>
-       
-       /* <Route path="/" element={<Login />} />
-        
-        
-       /* <Route path="/report" element={<Report />} />
-        <Route path="/awareness" element={<Awareness />} />
-
-      </Routes>
-  );
-}
-export default App;*/
