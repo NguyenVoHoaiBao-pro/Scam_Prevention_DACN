@@ -7,7 +7,6 @@ import ScamReport from './pages/scamReport';
 
 function App() {
   return (
-    <Router>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
@@ -16,7 +15,6 @@ function App() {
         <Route path="/awareness" element={<Awareness />} />
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
-    </Router>
   );
 }
 
