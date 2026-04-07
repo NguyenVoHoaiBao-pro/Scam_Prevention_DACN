@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 
-function Login({ onLoginSuccess }) {
+function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -47,12 +47,6 @@ function Login({ onLoginSuccess }) {
       }
 
       setSuccessMessage(result.message || "Login successful");
-      if (onLoginSuccess) {
-          
-          setTimeout(() => {
-              onLoginSuccess();
-          }, 1000); 
-        } 
     } catch (error) {
       setErrorMessage(error.message || "Unable to login right now.");
     } finally {
@@ -256,7 +250,7 @@ function Login({ onLoginSuccess }) {
                   className="flex h-16 items-center justify-center gap-3 rounded-xl border border-outline-variant/20 bg-surface-container text-lg font-semibold text-on-surface transition-colors hover:bg-surface-container-high"
                 >
                   <img
-                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/3840px-Google_%22G%22_logo.svg.png"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAU0jNk9LbUcQCljl1pU1tiHJIw9X5BmLnYV0n7cB8p5drH_au3lfVkqqfXw_2LWF1XSlomCL7LXnDMUmZ5mVDGUXieIk8nLkiqUqz5rLTMirBTXCWgclQeVsYk4mLYlMq5gjlqSFp0xlMwHfbnoynktTwvTk8NN3F9Rb28Zxtg5BRkSbTUUo43ta8kW9tSSBLn2H-T8IyxMJlcFwshG7SphOxiZUGKkRrUWX3jmCa03zaWczMaJo0hB8wnQbGO-0pbC9bBcluJfAI"
                     alt="Google"
                     className="h-6 w-6"
                   />
@@ -269,7 +263,7 @@ function Login({ onLoginSuccess }) {
                   className="flex h-16 items-center justify-center gap-3 rounded-xl border border-outline-variant/20 bg-surface-container text-lg font-semibold text-on-surface transition-colors hover:bg-surface-container-high"
                 >
                   <img
-                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Facebook_Logo_%282019%29.png/500px-Facebook_Logo_%282019%29.png"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAAE49k0Qevpyfh1E7EcoPhZBa1lpdy7W0kQ7InmFHUiJVuHNmWu7JLgBW0G6eRsqQYsEgrx1lyBuvlELXWOje15-vOM8FuC1gWiWNRIXnljBXcwfFGlhSyVvvnBmGOTlEn96P0O1M5qt89fCoisLMRfZ-DIAn1s6mErQ2JIUed9OpqjLFNSwf-06Ve2icXac7k7lW2y7UdAPyge7MChXtlUfo4rvls5cTGv6qQw5aZbAp1lXvSWwh9Laeq1_9P8UpIkdIemTOv8Rw"
                     alt="Facebook"
                     className="h-6 w-6"
                   />
@@ -317,7 +311,7 @@ function Login({ onLoginSuccess }) {
         </div>
 
         <p className="max-w-2xl font-lexend text-lg leading-relaxed text-slate-500 dark:text-slate-400">
-          © 2026 Fraud Scanner AI. All rights reserved. Secure protection for
+          © 2024 Fraud Scanner AI. All rights reserved. Secure protection for
           the digital age.
         </p>
       </footer>

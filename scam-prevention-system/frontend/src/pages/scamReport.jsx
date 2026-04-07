@@ -1,4 +1,6 @@
 import '../styles.css'; // Import file CSS thuần chứa các biến màu và animation
+import { Link } from 'react-router-dom'; 
+import Awareness from './Awareness';
 
 export default function CommunityScamReport() {
     return (
@@ -14,8 +16,12 @@ export default function CommunityScamReport() {
                     </div>
                     <div className="hidden md:flex items-center gap-12">
                         <a className="text-slate-600 dark:text-slate-400 font-medium hover:text-blue-700 dark:hover:text-blue-200 transition-colors uppercase tracking-wide text-sm" href="#">Scan Content</a>
-                        <a className="text-blue-800 dark:text-blue-300 font-bold border-b-4 border-blue-800 dark:border-blue-300 pb-1 uppercase tracking-wide text-sm" href="#">Report Scam</a>
-                        <a className="text-slate-600 dark:text-slate-400 font-medium hover:text-blue-700 dark:hover:text-blue-200 transition-colors uppercase tracking-wide text-sm" href="#">Awareness Hub</a>
+                        <Link to="/report" className="text-blue-800 dark:text-blue-300 font-bold border-b-4 border-blue-800 dark:border-blue-300 pb-1 uppercase tracking-wide text-sm">Report Scam</Link>
+                        
+                        <Link to="/awareness" className="text-slate-600 dark:text-slate-400 font-medium hover:text-blue-700 dark:hover:text-blue-200 transition-colors uppercase tracking-wide text-sm">
+                            Awareness Hub
+                        </Link>
+                    
                     </div>
                     <div className="flex items-center gap-6">
                         <button className="text-slate-600 dark:text-slate-400 hover:text-blue-900 transition-colors">
@@ -90,8 +96,8 @@ export default function CommunityScamReport() {
                                         <div className="flex items-center gap-3">
                                             <span className="text-xl font-bold text-on-surface">Sarah_K</span>
                                             <span className="bg-primary-fixed text-on-primary-fixed px-3 py-0.5 rounded-full text-sm font-semibold flex items-center gap-1">
-                                                <span className="material-symbols-outlined text-sm" data-icon="shield_person" style={{ fontVariationSettings: "'FILL' 1" }}>shield_person</span>
-                                                Contributor
+                                                <span className="material-symbols-outlined text-sm" data-icon="verified" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                                                Verified
                                             </span>
                                         </div>
                                         <p className="text-on-surface-variant text-base">Reported 5 hours ago</p>
@@ -130,8 +136,8 @@ export default function CommunityScamReport() {
                                         <div className="flex items-center gap-3">
                                             <span className="text-xl font-bold text-on-surface">Mark_Elderly_Guard</span>
                                             <span className="bg-tertiary-fixed text-on-tertiary-fixed px-3 py-0.5 rounded-full text-sm font-semibold flex items-center gap-1">
-                                                <span className="material-symbols-outlined text-sm" data-icon="verified_user" style={{ fontVariationSettings: "'FILL' 1" }}>verified_user</span>
-                                                Top Guardian
+                                                <span className="material-symbols-outlined text-sm" data-icon="verified" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                                                Verified
                                             </span>
                                         </div>
                                         <p className="text-on-surface-variant text-base">Reported 8 hours ago</p>
