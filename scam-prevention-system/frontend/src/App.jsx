@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 //import React, { useState } from "react";
 import Login from "./pages/Login";
 import Report from "./pages/scamReport";
@@ -19,3 +20,16 @@ function App() {
 }
 
 export default App;
+=======
+import Awareness from './pages/Awareness'; 
+
+function App() {
+  return (
+    <div className="App">
+      <Awareness />
+    </div>
+  )
+}
+
+export default App
+>>>>>>> awarenesshub
