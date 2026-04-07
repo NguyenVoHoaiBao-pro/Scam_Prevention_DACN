@@ -4,6 +4,8 @@ import json
 import os
 from urllib.parse import urlencode
 import requests
+import pymysql
+from flask import jsonify
 
 # Load OAuth config
 with open(os.path.join(os.path.dirname(__file__), '..', 'config.json')) as f:
@@ -155,3 +157,47 @@ def detect_text():
         "is_scam": is_scam,
         "message": "Scam detected!" if is_scam else "Text seems safe."
     })
+
+def get_db_connection():
+    return pymysql.connect(
+        host='localhost',
+        user='root',
+        password='12345',
+        database='scam_prevention_db',
+        cursorclass=pymysql.cursors.DictCursor
+    )
+@app.route("/api/warnings", methods=["GET"])
+def get_warnings():
+    connection = None
+    try:
+        # 1. Mở kết nối đến DB
+        connection = get_db_connection()
+        with connection.cursor() as cursor:
+            # 2. Truy vấn dữ liệu (Sắp xếp từ mới nhất đến cũ nhất)
+            sql = "SELECT id, title, content, risk_level, created_at FROM warnings ORDER BY created_at DESC"
+            cursor.execute(sql)
+            warnings = cursor.fetchall()
+
+        # 3. Chuyển đổi định dạng thời gian (datetime) sang chuỗi (string) để tránh lỗi JSON
+        for w in warnings:
+            if w['created_at']:
+                w['created_at'] = w['created_at'].strftime("%Y-%m-%d %H:%M:%S")
+
+        # 4. Trả về Frontend
+        return jsonify({
+            "status": "success",
+            "data": warnings,
+            "message": "Lấy dữ liệu MySQL thành công!"
+        }), 200
+
+    except Exception as e:
+        # Xử lý lỗi nếu database sập hoặc sai mật khẩu
+        return jsonify({
+            "status": "error",
+            "message": f"Lỗi Database: {str(e)}"
+        }), 500
+
+    finally:
+        # 5. Luôn nhớ đóng kết nối DB để không bị tràn bộ nhớ
+        if connection and connection.open:
+            connection.close()
