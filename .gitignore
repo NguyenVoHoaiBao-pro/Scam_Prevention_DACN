@@ -1,0 +1,21 @@
+<<<<<<< HEAD
+﻿node_modules/
+**/node_modules/
+venv/
+**/venv/
+__pycache__/
+**/__pycache__/
+.idea/
+**/.idea/
+.vscode/
+**/.vscode/
+dist/
+**/dist/
+build/
+**/build/
+*.pyc
+*.log
+=======
+scam-prevention-system/backend/config.json
+*.json
+>>>>>>> backendlogin
