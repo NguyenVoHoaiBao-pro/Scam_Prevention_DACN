@@ -1,0 +1,23 @@
+# Python virtual environment
+venv/
+**/venv/
+ENV/
+
+# Python cache
+__pycache__/
+**/__pycache__/
+*.pyc
+
+# Node.js
+node_modules/
+dist/
+
+# Environment & config
+.env
+*.env
+config.json
+
+# IDE
+.idea/
+.vscode/
+*.iml

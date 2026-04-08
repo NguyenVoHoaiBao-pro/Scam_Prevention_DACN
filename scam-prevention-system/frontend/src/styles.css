@@ -1,0 +1,15 @@
+
+/* Nút Gradient */
+.btn-gradient {
+    background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+}
+
+/* Hiệu ứng nhấp nháy cho cảnh báo */
+.fraud-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
