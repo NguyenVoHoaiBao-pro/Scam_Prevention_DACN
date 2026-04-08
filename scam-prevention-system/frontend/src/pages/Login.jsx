@@ -1,6 +1,11 @@
 import { useMemo, useState } from "react";
+<<<<<<< HEAD
 
 function Login({ onLoginSuccess }) {
+=======
+import { useNavigate } from "react-router-dom";
+function Login() {
+>>>>>>> main
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -8,6 +13,7 @@ function Login({ onLoginSuccess }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const navigate = useNavigate();
 
   const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
   const loginEndpoint = useMemo(
@@ -47,12 +53,16 @@ function Login({ onLoginSuccess }) {
       }
 
       setSuccessMessage(result.message || "Login successful");
+<<<<<<< HEAD
       if (onLoginSuccess) {
           
           setTimeout(() => {
               onLoginSuccess();
           }, 1000); 
         } 
+=======
+      navigate("/");
+>>>>>>> main
     } catch (error) {
       setErrorMessage(error.message || "Unable to login right now.");
     } finally {
@@ -106,6 +116,7 @@ function Login({ onLoginSuccess }) {
               </button>
               <button
                 type="button"
+                onClick={() => navigate('/register')}
                 className="flex-1 rounded-lg px-4 py-3 text-lg font-bold text-on-surface-variant transition-all duration-200 hover:bg-surface-container-high"
               >
                 Sign Up
