@@ -1,11 +1,6 @@
 import { useMemo, useState } from "react";
-<<<<<<< HEAD
-
-function Login({ onLoginSuccess }) {
-=======
 import { useNavigate } from "react-router-dom";
 function Login() {
->>>>>>> main
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -53,16 +48,7 @@ function Login() {
       }
 
       setSuccessMessage(result.message || "Login successful");
-<<<<<<< HEAD
-      if (onLoginSuccess) {
-          
-          setTimeout(() => {
-              onLoginSuccess();
-          }, 1000); 
-        } 
-=======
       navigate("/");
->>>>>>> main
     } catch (error) {
       setErrorMessage(error.message || "Unable to login right now.");
     } finally {
