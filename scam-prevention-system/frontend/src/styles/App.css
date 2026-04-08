@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-@theme {
+:root {
   /* Định nghĩa lại các màu từ file HTML gốc của bạn */
   --color-primary: #00288e;
   --color-surface: #f7f9fb;
