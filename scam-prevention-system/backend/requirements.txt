@@ -1,4 +1,8 @@
 requests
 flask
 flask-cors
+<<<<<<< HEAD
 flask_sqlalchemy
+=======
+
+>>>>>>> text-scam

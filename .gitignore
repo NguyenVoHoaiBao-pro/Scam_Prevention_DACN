@@ -1,21 +1,27 @@
-<<<<<<< HEAD
-﻿node_modules/
+node_modules/
 **/node_modules/
+
 venv/
 **/venv/
+
 __pycache__/
 **/__pycache__/
+
 .idea/
 **/.idea/
+
 .vscode/
 **/.vscode/
-dist/
-**/dist/
-build/
-**/build/
+
+.env
 *.pyc
 *.log
-=======
-scam-prevention-system/backend/config.json
-*.json
->>>>>>> backendlogin
+
+dist/
+**/dist/
+
+build/
+**/build/
+
+/package.json
+/package-lock.json

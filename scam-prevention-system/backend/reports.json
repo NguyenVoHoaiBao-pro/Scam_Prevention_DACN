@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1775704146,
+    "title": "Danger! Potential Fraud Alert.",
+    "description": "This message mimics a bank notification and contains common phishing signatures often used to steal login credentials.",
+    "scam_type": "phone",
+    "reporter_name": "Community User",
+    "email": null,
+    "created_at": "2026-04-09T10:09:06.807475",
+    "evidence": null
+  },
+  {
+    "id": 1775704147,
+    "title": "Danger! Potential Fraud Alert.",
+    "description": "This message mimics a bank notification and contains common phishing signatures often used to steal login credentials.",
+    "scam_type": "phone",
+    "reporter_name": "Community User",
+    "email": null,
+    "created_at": "2026-04-09T10:09:07.113046",
+    "evidence": null
+  }
+]
