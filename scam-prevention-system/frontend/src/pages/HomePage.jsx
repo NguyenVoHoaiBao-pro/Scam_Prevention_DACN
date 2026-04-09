@@ -116,8 +116,8 @@ const HomePage = () => {
   const handleReportSender = () => {
     if (!result) return;
     let inputContent = '';
-    if (activeTab === 'text') inputContent = textMessage;
-    else if (activeTab === 'phone') inputContent = phoneNumber;
+    if (activeTab === 'text') inputContent = textInput;
+    else if (activeTab === 'phone') inputContent = phoneInput;
     else if (activeTab === 'bank') inputContent = bankAccount;
     else if (activeTab === 'audio') inputContent = audioFile ? audioFile.name : 'Bản ghi âm';
 
