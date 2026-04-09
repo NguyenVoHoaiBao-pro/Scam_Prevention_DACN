@@ -9,35 +9,24 @@ const HomePage = () => {
   const [textInput, setTextInput] = useState("");
   const [phoneInput, setPhoneInput] = useState("");
   const [bankAccount, setBankAccount] = useState("");
+  const [selectedBank, setSelectedBank] = useState("");
   const [audioFile, setAudioFile] = useState(null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
 
-  const API_BASE = useMemo(
-    () =>
-      (import.meta.env.VITE_API_BASE_URL || "http://localhost:5000").replace(
-        /\/$/,
-        "",
-      ),
-    [],
-  );
-
-  const handleScan = async () => {
-  setError("");
-  setResult(null);
-
-  try {
-    // =========================
-    // TEXT
-    // =========================
-    if (activeTab === "text") {
-      if (!textInput.trim()) {
-        setError("Vui lòng nhập nội dung tin nhắn cần kiểm tra.");
-        return;
-      }
-
+  const API_BASE = useMemo(() => {
+    const base = import.meta.env.VITE_API_BASE_URL;
+    if (!base) console.warn("Missing API base URL");
+    return (base || "http://localhost:5000").replace(/\/$/, "");
+  }, []);
+  const handleTextScan = async () => {
+    if (!textInput.trim()) {
+      setError("Please enter the content.");
+      return;
+    }
+    try {
       setLoading(true);
 
       const response = await fetch(`${API_BASE}/api/detect-text`, {
@@ -51,31 +40,23 @@ const HomePage = () => {
       const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        throw new Error(
-          data.error || data.message || "Không thể kết nối đến máy chủ.",
-        );
+        throw new Error(data.message || "Unable to connect to the server.");
       }
 
       setResult(data);
-      return;
+    } finally {
+      setLoading(false);
     }
+  };
+  const handleBankScan = async () => {
+    try {
+      if (!bankAccount.trim() || !selectedBank) {
+        setError("Please enter your account number and select your bank.");
+        return;
+      }
 
-    // =========================
-    // PHONE (chưa làm)
-    // =========================
-    if (activeTab === "phone") {
-      setError(
-        "Chức năng kiểm tra số điện thoại sẽ được nối backend ở bước tiếp theo.",
-      );
-      return;
-    }
-
-    // =========================
-    // BANK ACCOUNT
-    // =========================
-    if (activeTab === "bank") {
-      if (!bankAccount.trim()) {
-        setError("Vui lòng nhập số tài khoản ngân hàng.");
+      if (!/^\d+$/.test(bankAccount)) {
+        setError("The account number must be a number.");
         return;
       }
 
@@ -87,7 +68,7 @@ const HomePage = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          bank_name: "Ngân hàng mặc định",
+          bank_name: selectedBank,
           account_number: bankAccount,
         }),
       });
@@ -95,53 +76,82 @@ const HomePage = () => {
       const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        throw new Error(
-          data.error || data.message || "Không thể kiểm tra tài khoản ngân hàng.",
-        );
+        throw new Error(data.message || "Account verification error.");
       }
 
       setResult(data);
-      return;
+    } finally {
+      setLoading(false);
     }
+  };
+    const handleAudioScan = async () => {
+      try {
+        if (!audioFile) {
+          setError("Please select an audio file.");
+          return;
+        }
 
-    // =========================
-    // AUDIO
-    // =========================
-    if (activeTab === "audio") {
-      if (!audioFile) {
-        setError("Vui lòng chọn file audio.");
-        return;
+        if (audioFile.size > 10 * 1024 * 1024) {
+          setError("The file is too large (>10MB)");
+          return;
+        }
+
+        const allowedTypes = [
+          "audio/mpeg",
+          "audio/wav",
+          "audio/mp4",
+          "audio/x-m4a"
+        ];
+
+        if (!allowedTypes.includes(audioFile.type)) {
+          setError("Invalid file!");
+          return;
+        }
+
+        setLoading(true);
+
+        const formData = new FormData();
+        formData.append("audio", audioFile);
+
+        const response = await fetch(`${API_BASE}/api/check-audio`, {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(data.message || "Audio test error!");
+        }
+
+        setResult(data);
+      } finally {
+        setLoading(false);
       }
+    };
+  const handleScan = async () => {
+    setError("");
+    setResult(null);
 
-      setLoading(true);
-
-      const formData = new FormData();
-      formData.append("audio", audioFile);
-
-      const response = await fetch(`${API_BASE}/api/check-audio`, {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        throw new Error(
-          data.error || data.message || "Không thể kiểm tra audio.",
-        );
+    try {
+      if (activeTab === "text") {
+        await handleTextScan();
+      } else if (activeTab === "bank") {
+        await handleBankScan();
+      } else if (activeTab === "audio") {
+        await handleAudioScan();
+      } else if (activeTab === "phone") {
+        setError("Function not yet supported");
       }
-
-      setResult(data);
-      return;
+    } catch (err) {
+      setError(err.message || "An error has occurred.");
+    } finally {
+      setLoading(false);
     }
+  };
 
-    setError("Loại kiểm tra chưa được hỗ trợ.");
-  } catch (err) {
-    setError(err.message || "Đã xảy ra lỗi.");
-  } finally {
-    setLoading(false);
-  }
-};
+
+
 
   const handleReportSender = () => {
     if (!result) return;
@@ -154,7 +164,10 @@ const HomePage = () => {
           : activeTab === "bank"
             ? bankAccount
             : "Unknown Sender",
-      message: activeTab === "text" ? textInput : result?.message || "",
+      message:
+        activeTab === "text"
+          ? textInput
+          : result?.input_text || "",
       reportContent: {
         title: result.is_scam
           ? "Danger! Potential Fraud Alert."
@@ -177,9 +190,10 @@ const HomePage = () => {
     setTextInput("");
     setPhoneInput("");
     setBankAccount("");
-    setAudioFile(null);
+    document.getElementById("audioUpload").value = "";
     setError("");
     setResult(null);
+    setSelectedBank("");
   };
 
   const riskLevel = (result?.risk_level || "low").toLowerCase();
@@ -374,20 +388,26 @@ const HomePage = () => {
 
               {activeTab === "bank" && (
                 <div>
+                  <select
+                    className="w-full p-4 mb-4 rounded-xl"
+                    value={selectedBank}
+                    onChange={(e) => setSelectedBank(e.target.value)}
+                  >
+                    <option value="">-- Select Bank --</option>
+                    <option value="Vietcombank">Vietcombank</option>
+                    <option value="Techcombank">Techcombank</option>
+                    <option value="BIDV">BIDV</option>
+                    <option value="MB Bank">MB Bank</option>
+                  </select>
+
                   <input
-                    className="w-full p-6 text-2xl bg-surface-container-highest border-none rounded-xl focus:ring-4 focus:ring-primary-fixed outline-none transition-all placeholder:text-outline font-bold"
+                    className="w-full p-6 text-2xl bg-surface-container-highest border-none rounded-xl"
                     placeholder="Enter bank account number..."
-                    type="text"
                     value={bankAccount}
                     onChange={(e) => setBankAccount(e.target.value)}
                   />
-                  <p className="mt-4 text-on-surface-variant text-base">
-                    We verify if the account has been flagged in recent
-                    fraudulent transfers.
-                  </p>
                 </div>
               )}
-
               {activeTab === "audio" && (
                 <div>
                   <div className="w-full p-12 bg-surface-container-highest border-4 border-dashed border-outline-variant rounded-xl flex flex-col items-center justify-center gap-4 text-center group cursor-pointer hover:bg-surface-container-high transition-colors">
@@ -407,10 +427,20 @@ const HomePage = () => {
                       <input
                         type="file"
                         accept=".mp3,.wav,.m4a"
+                        className="hidden"
+                        id="audioUpload"
                         onChange={(e) =>
                           setAudioFile(e.target.files?.[0] || null)
                         }
                       />
+                      {audioFile && (
+                        <p className="mt-2 text-sm text-green-600">
+                          Selected: {audioFile.name}
+                        </p>
+                      )}
+                      <label htmlFor="audioUpload" className="cursor-pointer">
+                        <p>Click to upload</p>
+                      </label>
                     </div>
                   </div>
                 </div>
@@ -565,7 +595,17 @@ const HomePage = () => {
                   <p className="text-xl text-on-surface-variant mb-8 leading-relaxed">
                     {result.message}
                   </p>
+                  {result.input_text && (
+                    <p className="text-sm mt-2">
+                      <b>Transcript:</b> {result.input_text}
+                    </p>
+                  )}
 
+                  {result.translated_text && (
+                    <p className="text-sm">
+                      <b>English:</b> {result.translated_text}
+                    </p>
+                  )}
                   <div className="space-y-6">
                     {Array.isArray(result.matched_patterns) &&
                       result.matched_patterns.length > 0 && (
