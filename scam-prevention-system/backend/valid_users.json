@@ -16,5 +16,17 @@
     "username": "support",
     "email": "support@example.com",
     "password": "support123"
+  },
+  {
+    "id": 4,
+    "username": "lekiet555",
+    "email": "lekiet1900@qa.team",
+    "password": "1"
+  },
+  {
+    "id": 5,
+    "username": "anata",
+    "email": "anata@gmail.com",
+    "password": "123"
   }
 ]
