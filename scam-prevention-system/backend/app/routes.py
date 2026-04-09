@@ -2,6 +2,7 @@ from . import app
 from flask import jsonify, request, redirect
 import json
 import os
+import sqlite3
 from urllib.parse import urlencode
 import requests
 import pymysql
@@ -14,18 +15,103 @@ with open(os.path.join(os.path.dirname(__file__), '..', 'config.json')) as f:
     oauth_config = json.load(f)
 
 FRONTEND_HOME_URL = oauth_config.get("FRONTEND_HOME_URL", "http://localhost:5173/")
+AUTH_DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'auth.db')
 
 
-def load_valid_users():
-    users_path = os.path.join(os.path.dirname(__file__), '..', 'valid_users.json')
-    with open(users_path, encoding="utf-8") as f:
-        return json.load(f)
+def get_auth_db_connection():
+    connection = sqlite3.connect(AUTH_DB_PATH)
+    connection.row_factory = sqlite3.Row
+    return connection
 
 
-def save_valid_users(users):
-    users_path = os.path.join(os.path.dirname(__file__), '..', 'valid_users.json')
-    with open(users_path, "w", encoding="utf-8") as f:
-        json.dump(users, f, indent=2)
+def init_auth_db():
+    with get_auth_db_connection() as connection:
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT NOT NULL,
+                email TEXT NOT NULL,
+                password TEXT NOT NULL
+            )
+            """
+        )
+        connection.execute(
+            "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_lower ON users (LOWER(email))"
+        )
+        connection.execute(
+            "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username_lower ON users (LOWER(username))"
+        )
+
+        # One-time migration from legacy JSON users if the table is empty.
+        user_count = connection.execute("SELECT COUNT(*) FROM users").fetchone()[0]
+        if user_count == 0:
+            users_path = os.path.join(os.path.dirname(__file__), '..', 'valid_users.json')
+            if os.path.exists(users_path):
+                with open(users_path, encoding="utf-8") as f:
+                    legacy_users = json.load(f)
+
+                for user in legacy_users:
+                    connection.execute(
+                        """
+                        INSERT OR IGNORE INTO users (id, username, email, password)
+                        VALUES (?, ?, ?, ?)
+                        """,
+                        (
+                            user.get("id"),
+                            (user.get("username") or "").strip(),
+                            (user.get("email") or "").strip().lower(),
+                            user.get("password") or "",
+                        ),
+                    )
+            connection.commit()
+
+
+def get_auth_user(email, username):
+    with get_auth_db_connection() as connection:
+        return connection.execute(
+            """
+            SELECT id, username, email, password
+            FROM users
+            WHERE LOWER(email) = ? OR LOWER(username) = ?
+            LIMIT 1
+            """,
+            (email, username),
+        ).fetchone()
+
+
+def auth_identity_exists(email, username):
+    with get_auth_db_connection() as connection:
+        row = connection.execute(
+            """
+            SELECT id
+            FROM users
+            WHERE LOWER(email) = ? OR LOWER(username) = ?
+            LIMIT 1
+            """,
+            (email, username),
+        ).fetchone()
+        return row is not None
+
+
+def create_auth_user(username, email, password):
+    with get_auth_db_connection() as connection:
+        cursor = connection.execute(
+            """
+            INSERT INTO users (username, email, password)
+            VALUES (?, ?, ?)
+            """,
+            (username, email, password),
+        )
+        connection.commit()
+        return {
+            "id": cursor.lastrowid,
+            "username": username,
+            "email": email,
+        }
+
+
+init_auth_db()
 
 
 @app.route("/api/auth/login", methods=["POST"])
@@ -38,29 +124,17 @@ def email_password_login():
     if not password or (not email and not username):
         return jsonify({"error": "email/username and password are required"}), 400
 
-    valid_users = load_valid_users()
-    matched_user = None
-
-    for user in valid_users:
-        user_email = (user.get("email") or "").strip().lower()
-        user_username = (user.get("username") or "").strip().lower()
-        user_password = user.get("password") or ""
-
-        identity_match = (email and email == user_email) or (username and username == user_username)
-        if identity_match and password == user_password:
-            matched_user = {
-                "id": user.get("id"),
-                "username": user.get("username"),
-                "email": user.get("email")
-            }
-            break
-
-    if not matched_user:
+    matched_user = get_auth_user(email, username)
+    if not matched_user or password != (matched_user["password"] or ""):
         return jsonify({"error": "Invalid credentials"}), 401
 
     return jsonify({
         "message": "Login successful",
-        "user": matched_user
+        "user": {
+            "id": matched_user["id"],
+            "username": matched_user["username"],
+            "email": matched_user["email"]
+        }
     })
 
 
@@ -74,23 +148,10 @@ def email_password_register():
     if not username or not email or not password:
         return jsonify({"error": "username, email and password are required"}), 400
 
-    valid_users = load_valid_users()
+    if auth_identity_exists(email, username.lower()):
+        return jsonify({"error": "Email or username already exists"}), 409
 
-    for user in valid_users:
-        existing_email = (user.get("email") or "").strip().lower()
-        if email == existing_email:
-            return jsonify({"error": "Email already exists"}), 409
-
-    next_id = max((user.get("id", 0) for user in valid_users), default=0) + 1
-    new_user = {
-        "id": next_id,
-        "username": username,
-        "email": email,
-        "password": password
-    }
-
-    valid_users.append(new_user)
-    save_valid_users(valid_users)
+    new_user = create_auth_user(username, email, password)
 
     return jsonify({
         "message": "Registration successful",
