@@ -5,17 +5,23 @@ import os
 from urllib.parse import urlencode
 import requests
 import pymysql
-from flask import jsonify
 import joblib
-import os
 
-# Load OAuth config
+from app.services.speech_to_text import process_audio_file
+from app.services.bank_lookup import check_bank_account
+
+# ==========================================
+# LOAD OAUTH CONFIG
+# ==========================================
 with open(os.path.join(os.path.dirname(__file__), '..', 'config.json')) as f:
     oauth_config = json.load(f)
 
 FRONTEND_HOME_URL = oauth_config.get("FRONTEND_HOME_URL", "http://localhost:5173/")
 
 
+# ==========================================
+# USER LOGIN / REGISTER HELPER
+# ==========================================
 def load_valid_users():
     users_path = os.path.join(os.path.dirname(__file__), '..', 'valid_users.json')
     with open(users_path, encoding="utf-8") as f:
@@ -28,6 +34,9 @@ def save_valid_users(users):
         json.dump(users, f, indent=2)
 
 
+# ==========================================
+# AUTH ROUTES
+# ==========================================
 @app.route("/api/auth/login", methods=["POST"])
 def email_password_login():
     data = request.get_json(silent=True) or {}
@@ -121,6 +130,7 @@ def google_callback():
     code = request.args.get("code")
     if not code:
         return jsonify({"error": "Missing code"}), 400
+
     token_url = "https://oauth2.googleapis.com/token"
     data = {
         "code": code,
@@ -129,12 +139,14 @@ def google_callback():
         "redirect_uri": oauth_config["GOOGLE_REDIRECT_URI"],
         "grant_type": "authorization_code"
     }
+
     token_resp = requests.post(token_url, data=data)
     token_json = token_resp.json()
     access_token = token_json.get("access_token")
+
     if not access_token:
         return jsonify({"error": "Failed to obtain access token", "details": token_json}), 400
-    # OAuth completed, send user back to homepage.
+
     return redirect(FRONTEND_HOME_URL)
 
 
@@ -143,7 +155,7 @@ def facebook_login():
     params = {
         "client_id": oauth_config["FACEBOOK_CLIENT_ID"],
         "redirect_uri": oauth_config["FACEBOOK_REDIRECT_URI"],
-        "state": "random_state_string",  # Should be random in production
+        "state": "random_state_string",
         "scope": "email,public_profile"
     }
     url = f"https://www.facebook.com/v17.0/dialog/oauth?{urlencode(params)}"
@@ -155,6 +167,7 @@ def facebook_callback():
     code = request.args.get("code")
     if not code:
         return jsonify({"error": "Missing code"}), 400
+
     token_url = "https://graph.facebook.com/v17.0/oauth/access_token"
     params = {
         "client_id": oauth_config["FACEBOOK_CLIENT_ID"],
@@ -162,19 +175,26 @@ def facebook_callback():
         "client_secret": oauth_config["FACEBOOK_CLIENT_SECRET"],
         "code": code
     }
+
     token_resp = requests.get(token_url, params=params)
     token_json = token_resp.json()
     access_token = token_json.get("access_token")
+
     if not access_token:
         return jsonify({"error": "Failed to obtain access token", "details": token_json}), 400
-    # OAuth completed, send user back to homepage.
+
     return redirect(FRONTEND_HOME_URL)
 
+
+# ==========================================
+# BASIC ROUTES
+# ==========================================
 @app.route("/")
 def home():
     return jsonify({
         "message": "Scam Prevention Backend is running!"
     })
+
 
 @app.route("/api/health")
 def health():
@@ -182,10 +202,10 @@ def health():
         "status": "ok"
     })
 
+
 # ==========================================
-# LOAD FILE AI MODEL
+# LOAD AI MODEL
 # ==========================================
-# Đường dẫn chỉ đến file scam_model.pkl bạn vừa tạo
 MODEL_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'models_saved', 'scam_model.pkl')
 
 try:
@@ -195,25 +215,28 @@ except Exception as e:
     scam_model = None
     print(f"Lỗi tải AI Model: {str(e)}. Hệ thống sẽ dùng từ khóa mặc định.")
 
+
 # ==========================================
-# API ENDPOINT: Quét văn bản bằng AI
+# TEXT SCAM DETECTION
 # ==========================================
 @app.route("/api/detect-text", methods=["POST"])
 def detect_text():
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
     text = data.get("text", "")
 
     if not text.strip():
-        return jsonify({"input_text": text, "is_scam": False, "message": "Vui lòng nhập nội dung."})
+        return jsonify({
+            "input_text": text,
+            "is_scam": False,
+            "message": "Vui lòng nhập nội dung."
+        })
 
     is_scam = False
 
     if scam_model:
-        # DÙNG AI ĐỂ DỰ ĐOÁN (PREDICT)
-        prediction = scam_model.predict([text])[0] # AI trả về 1 hoặc 0
+        prediction = scam_model.predict([text])[0]
         is_scam = bool(prediction == 1)
     else:
-        # Nếu AI lỗi, dùng lại logic từ khóa cũ làm phương án dự phòng
         suspicious_keywords = ["otp", "chuyển khoản", "trúng thưởng", "click link", "xác minh tài khoản"]
         is_scam = any(keyword.lower() in text.lower() for keyword in suspicious_keywords)
 
@@ -223,6 +246,10 @@ def detect_text():
         "message": "Phát hiện nội dung có dấu hiệu lừa đảo!" if is_scam else "Văn bản an toàn, không có dấu hiệu lừa đảo."
     })
 
+
+# ==========================================
+# DATABASE CONNECTION
+# ==========================================
 def get_db_connection():
     return pymysql.connect(
         host='localhost',
@@ -231,15 +258,19 @@ def get_db_connection():
         database='scam_prevention_db',
         cursorclass=pymysql.cursors.DictCursor
     )
+
+
+# ==========================================
+# WARNINGS API (DATABASE)
+# ==========================================
 @app.route("/api/warnings", methods=["GET", "POST"])
 def handle_warnings():
     connection = None
     try:
         connection = get_db_connection()
         with connection.cursor() as cursor:
-            # NẾU LÀ GỬI BÁO CÁO MỚI TỪ TRANG SCAN
             if request.method == "POST":
-                data = request.get_json()
+                data = request.get_json(silent=True) or {}
                 title = data.get("title")
                 content = data.get("content")
                 risk_level = data.get("risk_level", "High")
@@ -253,7 +284,6 @@ def handle_warnings():
                     "message": "Đã lưu cảnh báo vào cơ sở dữ liệu!"
                 }), 201
 
-            # NẾU LÀ LẤY DANH SÁCH CHO TRANG REPORT
             elif request.method == "GET":
                 sql = "SELECT id, title, content, risk_level, created_at FROM warnings ORDER BY created_at DESC"
                 cursor.execute(sql)
@@ -277,3 +307,66 @@ def handle_warnings():
     finally:
         if connection and connection.open:
             connection.close()
+
+
+# ==========================================
+# AUDIO CHECK API (NO DATABASE)
+# ==========================================
+# ==========================================
+# AUDIO CHECK API (NO DATABASE)
+# ==========================================
+@app.route("/api/check-audio", methods=["POST"])
+def check_audio():
+    try:
+        if "audio" not in request.files:
+            return jsonify({
+                "success": False,
+                "message": "Không tìm thấy file audio trong request"
+            }), 400
+
+        audio_file = request.files["audio"]
+        result = process_audio_file(audio_file)
+
+        if not result["success"]:
+            return jsonify(result), 400
+
+        return jsonify(result), 200
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Lỗi server: {str(e)}"
+        }), 500
+
+
+# ==========================================
+# BANK ACCOUNT CHECK API (NO DATABASE)
+# ==========================================
+@app.route("/api/check-bank-account", methods=["POST"])
+def check_bank_account_api():
+    try:
+        data = request.get_json(silent=True) or {}
+
+        if not data:
+            return jsonify({
+                "success": False,
+                "message": "Không nhận được dữ liệu JSON"
+            }), 400
+
+        bank_name = data.get("bank_name", "").strip()
+        account_number = data.get("account_number", "").strip()
+
+        if not bank_name or not account_number:
+            return jsonify({
+                "success": False,
+                "message": "Thiếu bank_name hoặc account_number"
+            }), 400
+
+        result = check_bank_account(bank_name, account_number)
+        return jsonify(result), 200
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Lỗi server: {str(e)}"
+        }), 500

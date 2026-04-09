@@ -25,64 +25,123 @@ const HomePage = () => {
   );
 
   const handleScan = async () => {
-    setError("");
-    setResult(null);
+  setError("");
+  setResult(null);
 
-    try {
-      if (activeTab === "text") {
-        if (!textInput.trim()) {
-          setError("Vui lòng nhập nội dung tin nhắn cần kiểm tra.");
-          return;
-        }
-
-        setLoading(true);
-
-        const response = await fetch(`${API_BASE}/api/detect-text`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ text: textInput }),
-        });
-
-        const data = await response.json().catch(() => ({}));
-
-        if (!response.ok) {
-          throw new Error(
-            data.error || data.message || "Không thể kết nối đến máy chủ.",
-          );
-        }
-
-        setResult(data);
+  try {
+    // =========================
+    // TEXT
+    // =========================
+    if (activeTab === "text") {
+      if (!textInput.trim()) {
+        setError("Vui lòng nhập nội dung tin nhắn cần kiểm tra.");
         return;
       }
 
-      if (activeTab === "phone") {
-        setError(
-          "Chức năng kiểm tra số điện thoại sẽ được nối backend ở bước tiếp theo.",
+      setLoading(true);
+
+      const response = await fetch(`${API_BASE}/api/detect-text`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text: textInput }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || data.message || "Không thể kết nối đến máy chủ.",
         );
-        return;
       }
 
-      if (activeTab === "bank") {
-        setError(
-          "Hiện tại chưa ưu tiên chức năng kiểm tra tài khoản ngân hàng.",
-        );
-        return;
-      }
-
-      if (activeTab === "audio") {
-        setError("Hiện tại chưa ưu tiên chức năng kiểm tra audio.");
-        return;
-      }
-
-      setError("Hiện tại chỉ hỗ trợ Text Message trước.");
-    } catch (err) {
-      setError(err.message || "Đã xảy ra lỗi.");
-    } finally {
-      setLoading(false);
+      setResult(data);
+      return;
     }
-  };
+
+    // =========================
+    // PHONE (chưa làm)
+    // =========================
+    if (activeTab === "phone") {
+      setError(
+        "Chức năng kiểm tra số điện thoại sẽ được nối backend ở bước tiếp theo.",
+      );
+      return;
+    }
+
+    // =========================
+    // BANK ACCOUNT
+    // =========================
+    if (activeTab === "bank") {
+      if (!bankAccount.trim()) {
+        setError("Vui lòng nhập số tài khoản ngân hàng.");
+        return;
+      }
+
+      setLoading(true);
+
+      const response = await fetch(`${API_BASE}/api/check-bank-account`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          bank_name: "Ngân hàng mặc định",
+          account_number: bankAccount,
+        }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || data.message || "Không thể kiểm tra tài khoản ngân hàng.",
+        );
+      }
+
+      setResult(data);
+      return;
+    }
+
+    // =========================
+    // AUDIO
+    // =========================
+    if (activeTab === "audio") {
+      if (!audioFile) {
+        setError("Vui lòng chọn file audio.");
+        return;
+      }
+
+      setLoading(true);
+
+      const formData = new FormData();
+      formData.append("audio", audioFile);
+
+      const response = await fetch(`${API_BASE}/api/check-audio`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || data.message || "Không thể kiểm tra audio.",
+        );
+      }
+
+      setResult(data);
+      return;
+    }
+
+    setError("Loại kiểm tra chưa được hỗ trợ.");
+  } catch (err) {
+    setError(err.message || "Đã xảy ra lỗi.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleReportSender = () => {
     if (!result) return;
