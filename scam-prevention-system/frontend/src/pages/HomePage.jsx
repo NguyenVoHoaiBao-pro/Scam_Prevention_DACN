@@ -93,7 +93,14 @@ const HomePage = () => {
                         <button className="p-3 rounded-full hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-blue-900 dark:text-blue-100">
                             <span className="material-symbols-outlined text-2xl" data-icon="settings">settings</span>
                         </button>
+<<<<<<< HEAD
                         <button className="p-3 rounded-full hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-blue-900 dark:text-blue-100">
+=======
+                        <button
+                            onClick={() => window.location.href = '/login'}
+                            className="p-3 rounded-full hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-blue-900 dark:text-blue-100"
+                        >
+>>>>>>> main
                             <span className="material-symbols-outlined text-2xl" data-icon="person">person</span>
                         </button>
                     </div>

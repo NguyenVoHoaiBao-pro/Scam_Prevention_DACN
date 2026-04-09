@@ -1,13 +1,31 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 # Logs
 logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+=======
+# Bỏ qua thư viện
+node_modules/
+**/node_modules/
 
+# Bỏ qua môi trường Python
+venv/
+**/venv/
+__pycache__/
+**/__pycache__/
+
+# Bỏ qua file cấu hình của WebStorm
+.idea/
+**/.idea/
+.vscode/
+
+# Bỏ qua file rác
+>>>>>>> main
+*.log
+*.pyc
+dist/
+**/dist/
+
+<<<<<<< HEAD
 node_modules/
 dist
 dist-ssr
@@ -48,3 +66,6 @@ dist/
 
 scam-prevention-system/backend/config.json
 >>>>>>> 76c3112b97da044fc89a9c9688aeaf5f6ab6653c
+=======
+scam-prevention-system/backend/config.json
+>>>>>>> main

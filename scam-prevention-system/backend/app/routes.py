@@ -8,16 +8,25 @@ import pymysql
 from flask import jsonify
 import joblib
 import os
+from .services.report_handler import save_report, get_reports
 
 # Load OAuth config
 with open(os.path.join(os.path.dirname(__file__), '..', 'config.json')) as f:
     oauth_config = json.load(f)
+
+FRONTEND_HOME_URL = oauth_config.get("FRONTEND_HOME_URL", "http://localhost:5173/")
 
 
 def load_valid_users():
     users_path = os.path.join(os.path.dirname(__file__), '..', 'valid_users.json')
     with open(users_path, encoding="utf-8") as f:
         return json.load(f)
+
+
+def save_valid_users(users):
+    users_path = os.path.join(os.path.dirname(__file__), '..', 'valid_users.json')
+    with open(users_path, "w", encoding="utf-8") as f:
+        json.dump(users, f, indent=2)
 
 
 @app.route("/api/auth/login", methods=["POST"])
@@ -56,6 +65,44 @@ def email_password_login():
     })
 
 
+@app.route("/api/auth/register", methods=["POST"])
+def email_password_register():
+    data = request.get_json(silent=True) or {}
+    username = (data.get("username") or "").strip()
+    email = (data.get("email") or "").strip().lower()
+    password = data.get("password") or ""
+
+    if not username or not email or not password:
+        return jsonify({"error": "username, email and password are required"}), 400
+
+    valid_users = load_valid_users()
+
+    for user in valid_users:
+        existing_email = (user.get("email") or "").strip().lower()
+        if email == existing_email:
+            return jsonify({"error": "Email already exists"}), 409
+
+    next_id = max((user.get("id", 0) for user in valid_users), default=0) + 1
+    new_user = {
+        "id": next_id,
+        "username": username,
+        "email": email,
+        "password": password
+    }
+
+    valid_users.append(new_user)
+    save_valid_users(valid_users)
+
+    return jsonify({
+        "message": "Registration successful",
+        "user": {
+            "id": new_user["id"],
+            "username": new_user["username"],
+            "email": new_user["email"]
+        }
+    }), 201
+
+
 @app.route("/api/auth/google/login")
 def google_login():
     params = {
@@ -88,13 +135,8 @@ def google_callback():
     access_token = token_json.get("access_token")
     if not access_token:
         return jsonify({"error": "Failed to obtain access token", "details": token_json}), 400
-    userinfo_resp = requests.get(
-        "https://www.googleapis.com/oauth2/v2/userinfo",
-        headers={"Authorization": f"Bearer {access_token}"}
-    )
-    userinfo = userinfo_resp.json()
-    # Here you would register or log in the user in your DB
-    return jsonify({"user": userinfo, "token": token_json})
+    # OAuth completed, send user back to homepage.
+    return redirect(FRONTEND_HOME_URL)
 
 
 @app.route("/api/auth/facebook/login")
@@ -126,13 +168,8 @@ def facebook_callback():
     access_token = token_json.get("access_token")
     if not access_token:
         return jsonify({"error": "Failed to obtain access token", "details": token_json}), 400
-    userinfo_resp = requests.get(
-        "https://graph.facebook.com/me",
-        params={"fields": "id,name,email,picture", "access_token": access_token}
-    )
-    userinfo = userinfo_resp.json()
-    # Here you would register or log in the user in your DB
-    return jsonify({"user": userinfo, "token": token_json})
+    # OAuth completed, send user back to homepage.
+    return redirect(FRONTEND_HOME_URL)
 
 @app.route("/")
 def home():
@@ -145,7 +182,38 @@ def health():
     return jsonify({
         "status": "ok"
     })
+# Route để lấy danh sách Reports (GET)
+@app.route("/api/reports", methods=["GET"])
+def fetch_reports():
+    try:
+        reports = get_reports()
+        # React đang mong đợi một mảng trực tiếp: setWarnings(result);
+        return jsonify(reports), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
+# Route để lưu Report mới (POST)
+@app.route("/api/report", methods=["POST"])
+def create_report():
+    try:
+        # gửi bằng FormData nên phải dùng request.form ở Flask
+        data = request.form
+        
+        # Hàm save_report cần 2 tham số: data và file
+        # Nếu React không gửi file đính kèm, request.files.get('file') sẽ trả về None
+        file = request.files.get('file') 
+        
+        report = save_report(data, file)
+        
+        # Trả về status success để React nhận biết (if response.ok)
+        return jsonify({
+            "status": "success", 
+            "message": "Report saved successfully",
+            "data": report
+        }), 201
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    
 # ==========================================
 # LOAD FILE AI MODEL
 # ==========================================

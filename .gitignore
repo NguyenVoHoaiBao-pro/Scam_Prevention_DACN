@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
 ﻿node_modules/
 **/node_modules/
 venv/
@@ -14,3 +18,10 @@ build/
 **/build/
 *.pyc
 *.log
+<<<<<<< HEAD
+=======
+=======
+scam-prevention-system/backend/config.json
+*.json
+>>>>>>> backendlogin
+>>>>>>> main
