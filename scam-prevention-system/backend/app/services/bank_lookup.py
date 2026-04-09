@@ -1,22 +1,28 @@
 def check_bank_account(bank_name, account_number):
     scam_accounts = {
-        "123456789": {
-            "reason": "Tài khoản đã bị nhiều người báo cáo nhận tiền lừa đảo",
-            "risk_score": 92
+        "Vietcombank": {
+            "123456789": {
+                "reason": "Reported scam multiple times",
+                "risk_score": 92
+            }
         },
-        "987654321": {
-            "reason": "Tài khoản nằm trong danh sách nghi ngờ giao dịch bất thường",
-            "risk_score": 85
+        "Techcombank": {
+            "987654321": {
+                "reason": "Suspicious transaction activity",
+                "risk_score": 85
+            }
         },
-        "111222333": {
-            "reason": "Tài khoản từng xuất hiện trong báo cáo giả mạo chuyển khoản",
-            "risk_score": 78
+        "MB Bank": {
+            "111222333": {
+                "reason": "Fake transfer scam",
+                "risk_score": 78
+            }
         }
     }
 
     account_number = str(account_number).strip()
 
-    if account_number in scam_accounts:
+    if bank_name in scam_accounts and account_number in scam_accounts[bank_name]:
         scam_info = scam_accounts[account_number]
 
         return {
@@ -28,11 +34,11 @@ def check_bank_account(bank_name, account_number):
             "risk_score": scam_info["risk_score"],
             "risk_level": "high",
             "matched_patterns": [
-                "Tài khoản nằm trong blacklist nội bộ",
+                "The account is on the internal blacklist.",
                 scam_info["reason"]
             ],
-            "recommendation": "Không chuyển tiền vào tài khoản này. Hãy xác minh lại người nhận và báo cáo nếu cần.",
-            "message": f"Tài khoản {account_number} có dấu hiệu rủi ro cao!"
+            "recommendation": "Do not transfer money to this account. Please verify the recipient and report if necessary.",
+            "message": f"Account {account_number} there are signs of high risk!"
         }
 
     return {
@@ -44,6 +50,6 @@ def check_bank_account(bank_name, account_number):
         "risk_score": 12,
         "risk_level": "low",
         "matched_patterns": [],
-        "recommendation": "Chưa phát hiện dấu hiệu bất thường trong dữ liệu mẫu hiện tại.",
-        "message": f"Tài khoản {account_number} hiện chưa có trong danh sách nghi ngờ."
+        "recommendation": "No abnormalities have been detected in the current sample data.",
+        "message": f"Account {account_number} not currently on the list of suspects."
     }
