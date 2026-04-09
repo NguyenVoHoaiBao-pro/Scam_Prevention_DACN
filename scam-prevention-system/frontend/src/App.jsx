@@ -4,20 +4,21 @@ import Register from "./pages/Register";
 import HomePage from "./pages/HomePage";
 import Awareness from './pages/Awareness';
 import ScamReport from './pages/scamReport';
+import ScanContent from "./pages/ScanContent";
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/scam-report" element={<ScamReport />} />
-        <Route path="/awareness" element={<Awareness />} />
-        <Route path="*" element={<Navigate to="/login" />} />
-      </Routes>
-    </Router>
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/scam-report" element={<ScamReport />} />
+      <Route path="/scan" element={<ScanContent />} />
+      <Route path="/awareness" element={<Awareness />} />
+      <Route path="*" element={<Navigate to="/login" />} />
+    </Routes>
   );
 }
 
 export default App;
+
