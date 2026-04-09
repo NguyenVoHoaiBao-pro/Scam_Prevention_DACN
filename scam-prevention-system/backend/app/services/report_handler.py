@@ -41,3 +41,14 @@ def save_report(data, file):
         json.dump(reports, f, indent=2)
 
     return report
+
+# Lấy danh sách report
+def get_reports():
+    if not os.path.exists(DATA_FILE):
+        return [] # Nếu file chưa tồn tại, trả về mảng rỗng
+        
+    try:
+        with open(DATA_FILE, 'r') as f:
+            return json.load(f)
+    except json.JSONDecodeError:
+        return [] # Tránh lỗi nếu file bị rỗng hoặc lỗi format

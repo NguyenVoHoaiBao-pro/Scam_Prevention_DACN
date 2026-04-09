@@ -1,6 +1,4 @@
 requests
-<<<<<<< HEAD
 flask
 flask-cors
-=======
->>>>>>> 76c3112b97da044fc89a9c9688aeaf5f6ab6653c
+flask_sqlalchemy

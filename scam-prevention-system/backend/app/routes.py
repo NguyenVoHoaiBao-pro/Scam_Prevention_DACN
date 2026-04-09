@@ -8,6 +8,7 @@ import pymysql
 from flask import jsonify
 import joblib
 import os
+from .services.report_handler import save_report, get_reports
 
 # Load OAuth config
 with open(os.path.join(os.path.dirname(__file__), '..', 'config.json')) as f:
@@ -181,7 +182,38 @@ def health():
     return jsonify({
         "status": "ok"
     })
+# Route để lấy danh sách Reports (GET)
+@app.route("/api/reports", methods=["GET"])
+def fetch_reports():
+    try:
+        reports = get_reports()
+        # React đang mong đợi một mảng trực tiếp: setWarnings(result);
+        return jsonify(reports), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
+# Route để lưu Report mới (POST)
+@app.route("/api/report", methods=["POST"])
+def create_report():
+    try:
+        # gửi bằng FormData nên phải dùng request.form ở Flask
+        data = request.form
+        
+        # Hàm save_report cần 2 tham số: data và file
+        # Nếu React không gửi file đính kèm, request.files.get('file') sẽ trả về None
+        file = request.files.get('file') 
+        
+        report = save_report(data, file)
+        
+        # Trả về status success để React nhận biết (if response.ok)
+        return jsonify({
+            "status": "success", 
+            "message": "Report saved successfully",
+            "data": report
+        }), 201
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    
 # ==========================================
 # LOAD FILE AI MODEL
 # ==========================================

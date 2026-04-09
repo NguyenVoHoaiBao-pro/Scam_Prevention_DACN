@@ -18,7 +18,7 @@ export default function CommunityScamReport() {
     const [newReportHelpful, setNewReportHelpful] = useState(false);
     
     // 2. Fetch API dữ liệu từ Backend
-    useEffect(() => {
+    /*useEffect(() => {
         const fetchWarnings = async () => {
             try {
                 const response = await fetch('http://localhost:5000/api/warnings');
@@ -38,7 +38,62 @@ export default function CommunityScamReport() {
         };
 
         fetchWarnings();
-    }, []);
+    }, []);*/
+    // 2. Fetch API dữ liệu từ Backend (Đã sửa lại để dùng SQLite)
+        useEffect(() => {
+            // Tự động lưu report mới vào SQLite nếu có data từ trang Scan truyền sang và chưa được lưu
+            const autoSaveReport = async () => {
+                // Kiểm tra xem có data từ trang scan truyền sang không và chưa được lưu
+                if (reportData && !reportData.isSaved) {
+                    try {
+                        // Backend dùng request.form, nên phải tạo FormData thay vì JSON
+                        const formData = new FormData();
+                        formData.append('title', reportData.reportContent?.title || 'Cảnh báo lừa đảo mới');
+                        formData.append('description', reportData.message || reportData.reportContent?.description || 'Không có nội dung');
+                        formData.append('scam_type', reportData.type || 'Unknown');
+                        formData.append('reporter_name', 'Community User'); // Có thể thay bằng tên user nếu đã đăng nhập
+
+                        const response = await fetch('http://localhost:5000/api/report', {
+                            method: 'POST',
+                            body: formData,
+                        });
+
+                        if (response.ok) {
+                            console.log('Đã lưu Report thành công vào SQLite!');
+                            reportData.isSaved = true; // Đánh dấu cờ này để React không gửi API lưu nhiều lần khi render lại
+                        } else {
+                            console.error('Lỗi từ server khi lưu report');
+                        }
+                    } catch (err) {
+                        console.error('Lỗi kết nối khi lưu report:', err);
+                    }
+                }
+            };
+
+            // Lấy danh sách report mới nhất từ SQLite
+            const fetchReports = async () => {
+                try {
+                   
+                    const response = await fetch('http://localhost:5000/api/reports');
+                    if (!response.ok) throw new Error('Lỗi khi kết nối đến máy chủ');
+
+                    const result = await response.json();
+                    // Vì API /api/reports trả về trực tiếp một mảng (array), không bọc trong result.data
+                    setWarnings(result); 
+                    
+                } catch (err) {
+                    setError(err.message);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            // Chạy hàm lưu trước, sau đó lấy danh sách mới nhất về
+            autoSaveReport().then(() => {
+                fetchReports();
+            });
+
+        }, [reportData]); // Effect phụ thuộc vào reportData
 
     // 3. Hàm xử lý khi bấm nút "Helpful"
     const handleToggleLike = (id) => {
@@ -255,7 +310,8 @@ export default function CommunityScamReport() {
                         {/* Render Dữ liệu Động từ Database */}
                         {!loading && !error && warnings.map((warning, index) => {
                             // Xử lý giao diện động theo mức độ rủi ro (High = Đỏ, Medium = Cam, Thấp = Xanh)
-                            const isHighRisk = warning.risk_level.toLowerCase() === 'high';
+                            const riskLevel = warning.risk_level || warning.scam_type || 'High';
+                            const isHighRisk = riskLevel.toLowerCase() === 'high';
                             const isLiked = likedItems[warning.id];
 
                             // Tạo avatar màu ngẫu nhiên cho đẹp giống bản gốc
@@ -296,9 +352,9 @@ export default function CommunityScamReport() {
                                         <span className={`material-symbols-outlined text-3xl ${isHighRisk ? 'text-error' : 'text-orange-500'}`} data-icon="warning" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
                                         <div>
                                             <h4 className={`font-bold text-xl mb-1 uppercase font-headline ${isHighRisk ? 'text-error' : 'text-orange-500'}`}>
-                                                AI Verdict: {warning.risk_level} Risk
+                                                AI Verdict: {riskLevel} Risk
                                             </h4>
-                                            <p className="text-on-surface text-lg leading-relaxed">{warning.content}</p>
+                                            <p className="text-on-surface text-lg leading-relaxed">{warning.description}</p>
                                         </div>
                                     </div>
 
