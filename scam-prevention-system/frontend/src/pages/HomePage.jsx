@@ -31,6 +31,12 @@ const HomePage = () => {
         });
     };
     const handleReportSender = () => {
+        // Lấy nội dung người dùng thực sự nhập dựa trên tab đang active
+        let inputContent = '';
+        if (activeTab === 'text') inputContent = textMessage;
+        else if (activeTab === 'phone') inputContent = phoneNumber;
+        else if (activeTab === 'bank') inputContent = bankAccount;
+        else if (activeTab === 'audio') inputContent = audioFile ? audioFile.name : 'Bản ghi âm';
         const senderInfo = {
             type: activeTab,
             sender:
@@ -39,7 +45,7 @@ const HomePage = () => {
                     : activeTab === 'bank'
                     ? bankAccount
                     : 'Unknown Sender',
-
+            userInput: inputContent,
             message:
                 activeTab === 'text'
                     ? textMessage

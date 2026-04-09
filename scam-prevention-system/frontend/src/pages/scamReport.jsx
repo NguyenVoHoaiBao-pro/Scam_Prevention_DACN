@@ -49,7 +49,9 @@ export default function CommunityScamReport() {
                         // Backend dùng request.form, nên phải tạo FormData thay vì JSON
                         const formData = new FormData();
                         formData.append('title', reportData.reportContent?.title || 'Cảnh báo lừa đảo mới');
-                        formData.append('description', reportData.message || reportData.reportContent?.description || 'Không có nội dung');
+                        const combinedDescription = `Nội dung nghi ngờ: ${reportData.userInput}\n\nĐánh giá AI: ${reportData.reportContent?.description || ''}`;
+                        formData.append('description', combinedDescription);
+                        //formData.append('description', reportData.message || reportData.reportContent?.description || 'Không có nội dung');
                         formData.append('scam_type', reportData.type || 'Unknown');
                         formData.append('reporter_name', 'Community User'); // Có thể thay bằng tên user nếu đã đăng nhập
 
@@ -207,7 +209,7 @@ export default function CommunityScamReport() {
                             </h3>
 
                             <p className="text-xl md:text-2xl text-on-surface font-medium italic leading-snug whitespace-pre-line break-all">
-                                "{ reportData.message || reportData.sender || 'No message content available.'}"
+                                "{ reportData.userInput || 'No message content available.'}"
                             </p>
                         </div>
                         {reportData.reportContent && (
