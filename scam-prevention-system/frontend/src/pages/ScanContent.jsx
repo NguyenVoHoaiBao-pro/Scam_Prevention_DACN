@@ -1,15 +1,23 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles.css";
 
 export default function ScanContent() {
+  const navigate = useNavigate();
+
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [reportStatus, setReportStatus] = useState("idle");
 
   const apiBaseUrl = useMemo(
-    () => (import.meta.env.VITE_API_BASE_URL || "http://localhost:5000").replace(/\/$/, ""),
-    []
+    () =>
+      (import.meta.env.VITE_API_BASE_URL || "http://localhost:5000").replace(
+        /\/$/,
+        "",
+      ),
+    [],
   );
 
   const handleScan = async () => {
@@ -21,6 +29,7 @@ export default function ScanContent() {
     setLoading(true);
     setError(null);
     setResult(null);
+    setReportStatus("idle");
 
     try {
       const response = await fetch(`${apiBaseUrl}/api/detect-text`, {
@@ -34,7 +43,11 @@ export default function ScanContent() {
       const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        throw new Error(data.error || data.message || "Không thể kết nối đến máy chủ quét AI.");
+        throw new Error(
+          data.error ||
+            data.message ||
+            "Không thể kết nối đến máy chủ quét AI.",
+        );
       }
 
       setResult(data);
@@ -42,6 +55,39 @@ export default function ScanContent() {
       setError(err.message || "Đã xảy ra lỗi không xác định.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSendReport = async () => {
+    if (!result) return;
+
+    setReportStatus("reporting");
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/warnings`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: result.input_text || text,
+          content: result.message || "",
+          risk_level: result.risk_level || (result.is_scam ? "high" : "low"),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Lỗi khi gửi báo cáo");
+      }
+
+      setReportStatus("success");
+
+      setTimeout(() => {
+        navigate("/scam-report");
+      }, 1200);
+    } catch (err) {
+      alert("Lỗi khi gửi báo cáo: " + (err.message || "Unknown error"));
+      setReportStatus("idle");
     }
   };
 
@@ -66,25 +112,25 @@ export default function ScanContent() {
             </span>
             <div
               className="text-3xl font-extrabold tracking-tight text-primary cursor-pointer"
-              onClick={() => (window.location.href = "/")}
+              onClick={() => navigate("/")}
             >
               Fraud Scanner AI
             </div>
           </div>
 
           <div className="hidden md:flex items-center gap-12">
-            <a
+            <button
               className="text-blue-800 dark:text-blue-300 font-bold border-b-4 border-blue-800 dark:border-blue-300 pb-1 uppercase tracking-wide text-sm"
-              href="/scan"
+              onClick={() => navigate("/scan")}
             >
               Scan Content
-            </a>
-            <a
+            </button>
+            <button
               className="text-slate-600 dark:text-slate-400 font-medium hover:text-blue-700 dark:hover:text-blue-200 transition-colors uppercase tracking-wide text-sm"
-              href="/report"
+              onClick={() => navigate("/scam-report")}
             >
               Report Scam
-            </a>
+            </button>
             <a
               className="text-slate-600 dark:text-slate-400 font-medium hover:text-blue-700 dark:hover:text-blue-200 transition-colors uppercase tracking-wide text-sm"
               href="/awareness"
@@ -94,7 +140,10 @@ export default function ScanContent() {
           </div>
 
           <div className="flex items-center gap-6">
-            <button className="text-slate-600 dark:text-slate-400 hover:text-blue-900 transition-colors">
+            <button
+              onClick={() => (window.location.href = "/login")}
+              className="text-slate-600 dark:text-slate-400 hover:text-blue-900 transition-colors"
+            >
               <span
                 className="material-symbols-outlined text-3xl"
                 data-icon="account_circle"
@@ -136,11 +185,15 @@ export default function ScanContent() {
               onClick={handleScan}
               disabled={loading}
               className={`btn-gradient py-4 px-10 rounded-2xl text-white font-bold text-xl flex items-center gap-3 shadow-md transition-all ${
-                loading ? "opacity-70 cursor-not-allowed" : "hover:brightness-110 active:scale-95"
+                loading
+                  ? "opacity-70 cursor-not-allowed"
+                  : "hover:brightness-110 active:scale-95"
               }`}
             >
               <span
-                className={`material-symbols-outlined ${loading ? "animate-spin" : ""}`}
+                className={`material-symbols-outlined ${
+                  loading ? "animate-spin" : ""
+                }`}
                 data-icon={loading ? "autorenew" : "document_scanner"}
               >
                 {loading ? "autorenew" : "document_scanner"}
@@ -263,7 +316,9 @@ export default function ScanContent() {
                     </div>
                   )}
 
-                {(result.recommendation || result.engine || result.rule_score != null) && (
+                {(result.recommendation ||
+                  result.engine ||
+                  result.rule_score != null) && (
                   <div className="bg-white/70 rounded-2xl p-5 border border-slate-200 space-y-3">
                     {result.recommendation && (
                       <p className="text-on-surface leading-relaxed">
@@ -294,6 +349,32 @@ export default function ScanContent() {
                 {result.warning && (
                   <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-800">
                     {result.warning}
+                  </div>
+                )}
+
+                {result.is_scam && (
+                  <div className="mt-6 pt-6 border-t border-error/20 flex flex-col items-end">
+                    {reportStatus === "success" ? (
+                      <p className="text-green-600 font-bold flex items-center gap-2">
+                        <span className="material-symbols-outlined">
+                          check_circle
+                        </span>
+                        Gửi báo cáo thành công! Đang chuyển trang...
+                      </p>
+                    ) : (
+                      <button
+                        onClick={handleSendReport}
+                        disabled={reportStatus === "reporting"}
+                        className="bg-error text-white py-3 px-6 rounded-xl font-bold flex items-center gap-2 hover:bg-error/90 active:scale-95 transition-all shadow-md"
+                      >
+                        <span className="material-symbols-outlined">
+                          campaign
+                        </span>
+                        {reportStatus === "reporting"
+                          ? "Đang gửi..."
+                          : "Đóng góp cảnh báo này cho cộng đồng"}
+                      </button>
+                    )}
                   </div>
                 )}
               </div>

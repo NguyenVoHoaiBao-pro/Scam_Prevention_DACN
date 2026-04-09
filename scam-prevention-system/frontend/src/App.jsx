@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import HomePage from "./pages/HomePage";
@@ -8,17 +8,15 @@ import ScanContent from './pages/ScanContent';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/scan" element={<ScanContent />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/scam-report" element={<ScamReport />} />
-        <Route path="/awareness" element={<Awareness />} />
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
-    </Router>
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/scan" element={<ScanContent />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/scam-report" element={<ScamReport />} />
+      <Route path="/awareness" element={<Awareness />} />
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
   );
 }
 
