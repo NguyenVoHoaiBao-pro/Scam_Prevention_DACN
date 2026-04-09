@@ -73,8 +73,6 @@ export default function ScanContent() {
                     <div className="hidden md:flex items-center gap-12">
                         <button onClick={() => navigate('/scan')} className="text-blue-800 font-bold border-b-4 border-blue-800 pb-1 uppercase text-sm">Scan Content</button>
                         <button onClick={() => navigate('/report')} className="text-slate-600 hover:text-blue-700 uppercase text-sm font-medium">Report Scam</button>
-<<<<<<< HEAD
-=======
                         <a className="text-slate-600 dark:text-slate-400 font-medium hover:text-blue-700 dark:hover:text-blue-200 transition-colors uppercase tracking-wide text-sm" href="/awareness">Awareness Hub</a>
                     </div>
                     <div className="flex items-center gap-6">
@@ -84,7 +82,6 @@ export default function ScanContent() {
                         >
                             <span className="material-symbols-outlined text-3xl" data-icon="account_circle">account_circle</span>
                         </button>
->>>>>>> main
                     </div>
                 </div>
             </nav>
