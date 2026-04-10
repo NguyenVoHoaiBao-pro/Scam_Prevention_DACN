@@ -43,3 +43,6 @@ h1, h2, h3 {
 .signature-gradient {
   background: linear-gradient(135deg, #00288e 0%, #1e40af 100%);
 }
+.fill-icon {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
