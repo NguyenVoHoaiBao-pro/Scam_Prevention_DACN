@@ -25,3 +25,8 @@ build/
 
 /package.json
 /package-lock.json
+*.pyc
+*.log
+scam-prevention-system/backend/config.json
+*.json
+

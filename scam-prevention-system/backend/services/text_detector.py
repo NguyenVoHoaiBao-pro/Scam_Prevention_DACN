@@ -33,19 +33,19 @@ def get_risk_level(score: int) -> str:
 
 def build_message(score: int) -> str:
     if score >= 70:
-        return "Tin nhắn có nhiều dấu hiệu lừa đảo/phishing rõ rệt."
+        return "This message shows clear signs of fraud or phishing."
     if score >= 40:
-        return "Tin nhắn có một số dấu hiệu đáng ngờ, cần kiểm tra kỹ."
-    return "Chưa phát hiện nhiều dấu hiệu lừa đảo theo bộ luật hiện tại."
+        return "This message contains some suspicious signs and should be reviewed carefully."
+    return "No strong scam indicators were detected under the current rule set."
 
 
 def combine_scores(rule_score: int, ml_probability: float, matched_patterns: list[str]) -> int:
     ml_score = int(ml_probability * 100)
 
-    # Hybrid score: cân bằng giữa model và rule
+    # Hybrid score: balance between model and rules
     final_score = int(0.55 * ml_score + 0.45 * rule_score)
 
-    # Override nhẹ nếu có combo nguy hiểm mạnh
+    # Light override for strong dangerous combinations
     if "otp_urgency_combo" in matched_patterns:
         final_score = max(final_score, 70)
 
@@ -71,7 +71,7 @@ def analyze_text(text: str) -> dict:
         if hasattr(model, "predict_proba"):
             ml_probability = float(model.predict_proba(text_vector)[0][1])
         else:
-            # fallback nếu model không support predict_proba
+            # Fallback if the model does not support predict_proba
             ml_probability = 1.0 if ml_prediction == 1 else 0.0
 
         final_score = combine_scores(rule_score, ml_probability, matched_patterns)
@@ -80,9 +80,9 @@ def analyze_text(text: str) -> dict:
         risk_level = get_risk_level(final_score)
 
         recommendation = (
-            "Không bấm vào liên kết, không cung cấp OTP/mật khẩu, và xác minh qua kênh chính thức."
+            "Do not click any links, do not share OTPs or passwords, and verify through official channels."
             if is_scam
-            else "Tiếp tục cẩn trọng nếu tin nhắn liên quan đến tài khoản, OTP hoặc chuyển tiền."
+            else "Stay cautious if the message involves accounts, OTPs, or money transfers."
         )
 
         return {
@@ -103,14 +103,14 @@ def analyze_text(text: str) -> dict:
         }
 
     except Exception as e:
-        # fallback sang rule-based nếu model chưa load được
+        # Fallback to rule-based detection if the ML model cannot be loaded
         is_scam = rule_score >= 45
         risk_level = get_risk_level(rule_score)
 
         recommendation = (
-            "Không bấm vào liên kết, không cung cấp OTP/mật khẩu, và xác minh qua kênh chính thức."
+            "Do not click any links, do not share OTPs or passwords, and verify through official channels."
             if is_scam
-            else "Tiếp tục cẩn trọng nếu tin nhắn liên quan đến tài khoản, OTP hoặc chuyển tiền."
+            else "Stay cautious if the message involves accounts, OTPs, or money transfers."
         )
 
         return {
@@ -128,5 +128,5 @@ def analyze_text(text: str) -> dict:
             "matched_patterns": matched_patterns,
             "message": build_message(rule_score),
             "recommendation": recommendation,
-            "warning": f"Không load được model ML, đang dùng fallback rule-based: {str(e)}",
+            "warning": f"Could not load the ML model. Using rule-based fallback instead: {str(e)}",
         }

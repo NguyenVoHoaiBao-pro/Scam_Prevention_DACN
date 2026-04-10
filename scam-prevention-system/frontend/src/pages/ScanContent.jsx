@@ -22,7 +22,7 @@ export default function ScanContent() {
 
   const handleScan = async () => {
     if (!text.trim()) {
-      setError("Vui lòng nhập nội dung cần quét!");
+      setError("Please enter content to scan.");
       return;
     }
 
@@ -46,13 +46,13 @@ export default function ScanContent() {
         throw new Error(
           data.error ||
             data.message ||
-            "Không thể kết nối đến máy chủ quét AI.",
+            "Unable to connect to the AI scanning server.",
         );
       }
 
       setResult(data);
     } catch (err) {
-      setError(err.message || "Đã xảy ra lỗi không xác định.");
+      setError(err.message || "An unknown error occurred.");
     } finally {
       setLoading(false);
     }
@@ -77,7 +77,7 @@ export default function ScanContent() {
       });
 
       if (!response.ok) {
-        throw new Error("Lỗi khi gửi báo cáo");
+        throw new Error("Failed to submit the report.");
       }
 
       setReportStatus("success");
@@ -86,7 +86,7 @@ export default function ScanContent() {
         navigate("/scam-report");
       }, 1200);
     } catch (err) {
-      alert("Lỗi khi gửi báo cáo: " + (err.message || "Unknown error"));
+      alert("Failed to submit report: " + (err.message || "Unknown error"));
       setReportStatus("idle");
     }
   };
@@ -161,15 +161,15 @@ export default function ScanContent() {
             Instant AI Threat Scanner
           </h1>
           <p className="text-on-surface-variant text-lg md:text-xl leading-relaxed">
-            Nghi ngờ một tin nhắn, email hoặc đường link? Hãy dán nó vào bên
-            dưới để hệ thống AI của chúng tôi phân tích rủi ro ngay lập tức.
+            Suspicious of a message, email, or link? Paste it below and let our
+            AI system analyze the risk instantly.
           </p>
         </header>
 
         <div className="bg-surface-container-lowest rounded-3xl p-6 md:p-10 shadow-lg border border-outline-variant/30 mb-8">
           <textarea
             className="w-full h-48 p-6 bg-surface-container-highest border-none rounded-2xl text-on-surface text-lg md:text-xl font-medium focus:ring-4 focus:ring-primary/20 resize-none transition-all placeholder:text-on-surface-variant/50"
-            placeholder="Dán tin nhắn, SMS, đường link hoặc email đáng ngờ vào đây..."
+            placeholder="Paste a suspicious message, SMS, link, or email here..."
             value={text}
             onChange={(e) => setText(e.target.value)}
           />
@@ -198,7 +198,7 @@ export default function ScanContent() {
               >
                 {loading ? "autorenew" : "document_scanner"}
               </span>
-              {loading ? "Đang phân tích..." : "Bắt đầu quét"}
+              {loading ? "Analyzing..." : "Start Scan"}
             </button>
           </div>
         </div>
@@ -228,12 +228,12 @@ export default function ScanContent() {
                   }`}
                 >
                   {result.is_scam
-                    ? "Cảnh báo: Phát hiện Lừa đảo!"
-                    : "Trạng thái: An toàn"}
+                    ? "Warning: Scam Detected!"
+                    : "Status: Safe"}
                 </h3>
 
                 <p className="text-on-surface text-lg leading-relaxed mb-5">
-                  <strong className="font-bold">Nhận định của AI:</strong>{" "}
+                  <strong className="font-bold">AI Assessment:</strong>{" "}
                   {result.message}
                 </p>
 
@@ -285,7 +285,7 @@ export default function ScanContent() {
                         result.is_scam ? "text-amber-700" : "text-green-700"
                       }`}
                     >
-                      Nội dung được phân tích:
+                      Analyzed content:
                     </p>
                     <p
                       className={`italic ${
@@ -301,7 +301,7 @@ export default function ScanContent() {
                   result.matched_patterns.length > 0 && (
                     <div className="mb-5">
                       <p className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-3">
-                        Dấu hiệu phát hiện
+                        Detected indicators
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {result.matched_patterns.map((pattern) => (
@@ -322,7 +322,7 @@ export default function ScanContent() {
                   <div className="bg-white/70 rounded-2xl p-5 border border-slate-200 space-y-3">
                     {result.recommendation && (
                       <p className="text-on-surface leading-relaxed">
-                        <strong>Khuyến nghị:</strong> {result.recommendation}
+                        <strong>Recommendation:</strong> {result.recommendation}
                       </p>
                     )}
 
@@ -359,7 +359,7 @@ export default function ScanContent() {
                         <span className="material-symbols-outlined">
                           check_circle
                         </span>
-                        Gửi báo cáo thành công! Đang chuyển trang...
+                        Report submitted successfully! Redirecting...
                       </p>
                     ) : (
                       <button
@@ -371,8 +371,8 @@ export default function ScanContent() {
                           campaign
                         </span>
                         {reportStatus === "reporting"
-                          ? "Đang gửi..."
-                          : "Đóng góp cảnh báo này cho cộng đồng"}
+                          ? "Submitting..."
+                          : "Contribute this alert to the community"}
                       </button>
                     )}
                   </div>
