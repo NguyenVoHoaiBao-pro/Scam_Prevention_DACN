@@ -14,12 +14,15 @@ const Awareness = () => {
             <a className="text-primary border-b-4 border-primary font-headline font-bold px-3 py-2" href="#">Awareness Hub</a>
           </div>
         </div>
+
         <div className="flex items-center gap-4">
           <button
             onClick={() => window.location.href = '/login'}
             className="text-primary"
           >
-            <span className="material-symbols-outlined text-primary text-3xl cursor-pointer">account_circle</span>
+            <span className="material-symbols-outlined text-primary text-3xl cursor-pointer">
+              account_circle
+            </span>
           </button>
         </div>
       </nav>
