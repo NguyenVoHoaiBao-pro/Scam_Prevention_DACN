@@ -345,7 +345,7 @@ export default function CommunityScamReport() {
                         {!loading &&
                             !error &&
                             warnings.map((warning, index) => {
-                                const isHighRisk = warning.risk_level.toLowerCase() === 'high';
+                                const isHighRisk = warning.risk_level?.toLowerCase() === 'high';
                                 const isLiked = likedItems[warning.id];
 
                                 const avatarColors = [

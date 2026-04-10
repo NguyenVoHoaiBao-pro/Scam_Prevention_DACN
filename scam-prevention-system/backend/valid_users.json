@@ -28,5 +28,11 @@
     "username": "anata",
     "email": "anata@gmail.com",
     "password": "123"
+  },
+  {
+    "id": 6,
+    "username": "ca",
+    "email": "ca@gmail.com",
+    "password": "123"
   }
 ]

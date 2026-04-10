@@ -446,6 +446,7 @@ const HomePage = () => {
     </div>
   )}
 
+
   {error && (
     <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700 font-semibold">
       {error}
@@ -468,54 +469,57 @@ const HomePage = () => {
   </span>
   {loading ? "Scanning..." : "Scan for Risk"}
 </button>
-
-          <div className="lg:col-span-5 h-full">
-            <div className="bg-surface-container-low rounded-xl p-8 h-full flex flex-col justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-primary mb-6">
-                  How it works
-                </h2>
-                <ul className="space-y-6">
-                  <li className="flex gap-4">
-                    <span className="bg-primary-fixed text-primary w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center font-bold">
-                      1
-                    </span>
-                    <p className="text-lg text-on-surface-variant">
-                      Our AI scans for known phishing patterns and linguistic
-                      tricks used by fraudsters.
-                    </p>
-                  </li>
-                  <li className="flex gap-4">
-                    <span className="bg-primary-fixed text-primary w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center font-bold">
-                      2
-                    </span>
-                    <p className="text-lg text-on-surface-variant">
-                      We verify URLs and data against global databases of
-                      malicious activity.
-                    </p>
-                  </li>
-                  <li className="flex gap-4">
-                    <span className="bg-primary-fixed text-primary w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center font-bold">
-                      3
-                    </span>
-                    <p className="text-lg text-on-surface-variant">
-                      You receive a clear safety rating and step-by-step
-                      guidance.
-                    </p>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="mt-12 rounded-xl overflow-hidden shadow-inner">
-                <img
-                  alt="close-up of hands holding a smartphone with safe checkmark"
-                  className="w-full h-48 object-cover"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUBN4OwRx3EWG3_WyEUo9sXDEaO9GatDXkYcwBfqI1_gjs4TdFB65MbXl3-Bw7K62gNKwjYY6a9LkA5etFskk92yLiPGwCHTS_nrUSOjWBmGPODNelxsQfY7lrnQC-1Bk-JuTYBIyqKjDomnf6hC4DOLyKcjnx0yNOj8j1d3ANA-3S__fX-A-B2eDoNxPGjkjI9jX9i19qQoiJH8zMBgaK7MGnbQFAm9jvOa80jlS-raCzIZVNRqUxYD-RrxxW8VyystlFMxboWLo"
-                />
-              </div>
-            </div>
           </div>
-        </div>
+
+          {/* Sidebar How it works */}
+          <div className="lg:col-span-5 h-full">
+            <aside className="sticky top-28">
+              <div className="bg-surface-container-low rounded-2xl p-8 h-full flex flex-col justify-between shadow-lg border border-primary/10">
+                <div>
+                  <h2 className="text-2xl font-bold text-primary mb-6 text-center lg:text-left">
+                    How it works
+                  </h2>
+                  <ul className="space-y-6">
+                    <li className="flex gap-4 items-center">
+                      <span className="bg-primary-fixed text-primary w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center font-bold">
+                        1
+                      </span>
+                      <p className="text-lg text-on-surface-variant">
+                        Our AI scans for known phishing patterns and linguistic
+                        tricks used by fraudsters.
+                      </p>
+                    </li>
+                    <li className="flex gap-4 items-center">
+                      <span className="bg-primary-fixed text-primary w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center font-bold">
+                        2
+                      </span>
+                      <p className="text-lg text-on-surface-variant">
+                        We verify URLs and data against global databases of
+                        malicious activity.
+                      </p>
+                    </li>
+                    <li className="flex gap-4 items-center">
+                      <span className="bg-primary-fixed text-primary w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center font-bold">
+                        3
+                      </span>
+                      <p className="text-lg text-on-surface-variant">
+                        You receive a clear safety rating and step-by-step
+                        guidance.
+                      </p>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="mt-12 rounded-xl overflow-hidden shadow-inner">
+                  <img
+                    alt="close-up of hands holding a smartphone with safe checkmark"
+                    className="w-full h-48 object-cover"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUBN4OwRx3EWG3_WyEUo9sXDEaO9GatDXkYcwBfqI1_gjs4TdFB65MbXl3-Bw7K62gNKwjYY6a9LkA5etFskk92yLiPGwCHTS_nrUSOjWBmGPODNelxsQfY7lrnQC-1Bk-JuTYBIyqKjDomnf6hC4DOLyKcjnx0yNOj8j1d3ANA-3S__fX-A-B2eDoNxPGjkjI9jX9i19qQoiJH8zMBgaK7MGnbQFAm9jvOa80jlS-raCzIZVNRqUxYD-RrxxW8VyystlFMxboWLo"
+                  />
+                </div>
+              </div>
+            </aside>
+          </div>
         </div>
 
         {result && (

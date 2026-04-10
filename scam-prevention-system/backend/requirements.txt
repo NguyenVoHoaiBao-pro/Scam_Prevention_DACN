@@ -1,18 +1,6 @@
 requests
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-flask
-flask-cors
-=======
->>>>>>> 76c3112b97da044fc89a9c9688aeaf5f6ab6653c
-=======
 flask
 flask-cors
 flask_sqlalchemy
->>>>>>> main
-=======
-flask
-flask-cors
-
->>>>>>> 4568eb6644fc05d8fb326ee016d93185daecedd0
+faster-whisper
+eng_to_ipa
