@@ -1,6 +1,7 @@
 requests
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 flask
 flask-cors
 =======
@@ -10,3 +11,8 @@ flask
 flask-cors
 flask_sqlalchemy
 >>>>>>> main
+=======
+flask
+flask-cors
+
+>>>>>>> 4568eb6644fc05d8fb326ee016d93185daecedd0

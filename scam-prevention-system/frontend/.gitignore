@@ -1,7 +1,6 @@
 
 # Logs
 logs
-=======
 # Bỏ qua thư viện
 node_modules/
 **/node_modules/

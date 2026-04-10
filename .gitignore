@@ -1,23 +1,30 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 <<<<<<< HEAD
 >>>>>>> main
 ﻿node_modules/
+=======
+node_modules/
+>>>>>>> 4568eb6644fc05d8fb326ee016d93185daecedd0
 **/node_modules/
+
 venv/
 **/venv/
+
 __pycache__/
 **/__pycache__/
+
 .idea/
 **/.idea/
+
 .vscode/
 **/.vscode/
-dist/
-**/dist/
-build/
-**/build/
+
+.env
 *.pyc
 *.log
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 =======
@@ -25,3 +32,14 @@ scam-prevention-system/backend/config.json
 *.json
 >>>>>>> backendlogin
 >>>>>>> main
+=======
+
+dist/
+**/dist/
+
+build/
+**/build/
+
+/package.json
+/package-lock.json
+>>>>>>> 4568eb6644fc05d8fb326ee016d93185daecedd0
