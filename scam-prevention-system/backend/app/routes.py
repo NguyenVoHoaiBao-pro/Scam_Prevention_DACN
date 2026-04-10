@@ -9,6 +9,7 @@ import pymysql
 from flask import jsonify
 import joblib
 import os
+import bcrypt
 
 # Load OAuth config
 with open(os.path.join(os.path.dirname(__file__), '..', 'config.json')) as f:
@@ -16,6 +17,26 @@ with open(os.path.join(os.path.dirname(__file__), '..', 'config.json')) as f:
 
 FRONTEND_HOME_URL = oauth_config.get("FRONTEND_HOME_URL", "http://localhost:5173/")
 AUTH_DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'auth.db')
+
+
+def hash_password(password):
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+
+def verify_password(plain_password, stored_password_hash):
+    if not stored_password_hash:
+        return False
+    try:
+        return bcrypt.checkpw(
+            plain_password.encode("utf-8"),
+            stored_password_hash.encode("utf-8")
+        )
+    except ValueError:
+        return False
+
+
+def looks_like_bcrypt_hash(value):
+    return isinstance(value, str) and value.startswith(("$2a$", "$2b$", "$2y$"))
 
 
 def get_auth_db_connection():
@@ -61,10 +82,21 @@ def init_auth_db():
                             user.get("id"),
                             (user.get("username") or "").strip(),
                             (user.get("email") or "").strip().lower(),
-                            user.get("password") or "",
+                            hash_password(user.get("password") or ""),
                         ),
                     )
-            connection.commit()
+
+        # One-time migration for existing plaintext passwords in SQLite auth.db.
+        users = connection.execute("SELECT id, password FROM users").fetchall()
+        for user in users:
+            current_password = user["password"] or ""
+            if not looks_like_bcrypt_hash(current_password):
+                connection.execute(
+                    "UPDATE users SET password = ? WHERE id = ?",
+                    (hash_password(current_password), user["id"]),
+                )
+
+        connection.commit()
 
 
 def get_auth_user(email, username):
@@ -96,12 +128,13 @@ def auth_identity_exists(email, username):
 
 def create_auth_user(username, email, password):
     with get_auth_db_connection() as connection:
+        password_hash = hash_password(password)
         cursor = connection.execute(
             """
             INSERT INTO users (username, email, password)
             VALUES (?, ?, ?)
             """,
-            (username, email, password),
+            (username, email, password_hash),
         )
         connection.commit()
         return {
@@ -125,7 +158,7 @@ def email_password_login():
         return jsonify({"error": "email/username and password are required"}), 400
 
     matched_user = get_auth_user(email, username)
-    if not matched_user or password != (matched_user["password"] or ""):
+    if not matched_user or not verify_password(password, matched_user["password"] or ""):
         return jsonify({"error": "Invalid credentials"}), 401
 
     return jsonify({
