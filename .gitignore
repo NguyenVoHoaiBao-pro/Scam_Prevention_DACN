@@ -30,3 +30,7 @@ build/
 scam-prevention-system/backend/config.json
 *.json
 
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
