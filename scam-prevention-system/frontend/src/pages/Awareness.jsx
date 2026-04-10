@@ -53,9 +53,14 @@ const Awareness = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          <Link to="/login" className="text-primary hover:opacity-80 transition-opacity">
-            <span className="material-symbols-outlined text-primary text-3xl cursor-pointer">account_circle</span>
-          </Link>
+          <button
+            onClick={() => window.location.href = '/login'}
+            className="text-primary"
+          >
+            <span className="material-symbols-outlined text-primary text-3xl cursor-pointer">
+              account_circle
+            </span>
+          </button>
         </div>
       </nav>
 
