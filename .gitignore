@@ -42,4 +42,13 @@ build/
 
 /package.json
 /package-lock.json
+<<<<<<< HEAD
 >>>>>>> 4568eb6644fc05d8fb326ee016d93185daecedd0
+=======
+*.pyc
+*.log
+scam-prevention-system/backend/config.json
+*.json
+
+/scam-prevention-system/frontend/node_modules
+>>>>>>> backend2

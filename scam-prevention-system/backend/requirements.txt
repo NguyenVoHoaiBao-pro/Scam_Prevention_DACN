@@ -1,6 +1,14 @@
-requests
 flask
 flask-cors
+<<<<<<< HEAD
 flask_sqlalchemy
 faster-whisper
 eng_to_ipa
+=======
+requests
+pymysql
+joblib
+bcrypt
+pandas
+scikit-learn
+>>>>>>> backend2

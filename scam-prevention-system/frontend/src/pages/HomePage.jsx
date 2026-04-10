@@ -135,6 +135,7 @@ const HomePage = () => {
 
     try {
       if (activeTab === "text") {
+<<<<<<< HEAD
         await handleTextScan();
       } else if (activeTab === "bank") {
         await handleBankScan();
@@ -145,6 +146,82 @@ const HomePage = () => {
       }
     } catch (err) {
       setError(err.message || "An error has occurred.");
+=======
+        if (!textInput.trim()) {
+          setError("Please enter the message content to check.");
+          return;
+        }
+
+        setLoading(true);
+
+        const response = await fetch(`${API_BASE}/api/detect-text`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ text: textInput }),
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(
+            data.error || data.message || "Không thể kết nối đến máy chủ.",
+          );
+        }
+
+        setResult(data);
+        return;
+      }
+
+      if (activeTab === "phone") {
+        if (!phoneInput.trim()) {
+          setError("Please enter the phone number to check.");
+          return;
+        }
+
+        setLoading(true);
+
+        const response = await fetch(`${API_BASE}/api/detect-phone`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ phone: phoneInput }),
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(
+            data.error || data.message || "Unable to connect to the server.",
+          );
+        }
+
+        setResult(data);
+        return;
+      }
+
+      if (activeTab === "bank") {
+        setError(
+          "Only text message and phone number checks are supported right now.",
+        );
+        return;
+      }
+
+      if (activeTab === "audio") {
+        setError(
+          "Only text message and phone number checks are supported right now.",
+        );
+        return;
+      }
+
+      setError(
+        "Only text message and phone number checks are supported right now.",
+      );
+    } catch (err) {
+      setError(err.message || "An unexpected error occurred.");
+>>>>>>> backend2
     } finally {
       setLoading(false);
     }
@@ -160,18 +237,22 @@ const HomePage = () => {
       type: activeTab,
       sender:
         activeTab === "phone"
-          ? phoneInput
+          ? result.display_phone || result.input_phone || phoneInput
           : activeTab === "bank"
             ? bankAccount
             : "Unknown Sender",
       message:
         activeTab === "text"
           ? textInput
+<<<<<<< HEAD
           : result?.input_text || "",
+=======
+          : activeTab === "phone"
+            ? `Phone number checked: ${result.display_phone || result.input_phone || phoneInput}`
+            : result?.message || "",
+>>>>>>> backend2
       reportContent: {
-        title: result.is_scam
-          ? "Danger! Potential Fraud Alert."
-          : "Analysis Completed",
+        title: resultTitle,
         description: result.message || "",
         suspicious: result.matched_patterns || [],
         recommendation: result.recommendation || "",
@@ -186,7 +267,6 @@ const HomePage = () => {
   };
 
   const handleReset = () => {
-    setActiveTab("text");
     setTextInput("");
     setPhoneInput("");
     setBankAccount("");
@@ -198,6 +278,114 @@ const HomePage = () => {
 
   const riskLevel = (result?.risk_level || "low").toLowerCase();
   const isScam = Boolean(result?.is_scam);
+  const isPhoneResult = result?.type === "phone";
+  const isTextResult = result?.type === "text";
+  const isInvalidPhone = isPhoneResult && result?.is_valid === false;
+
+  const severity = isInvalidPhone
+    ? "invalid"
+    : riskLevel === "high"
+      ? "high"
+      : riskLevel === "medium"
+        ? "medium"
+        : "low";
+
+  const severityStyles = {
+    invalid: {
+      card: "border-slate-500 bg-slate-100/90",
+      ring: "border-slate-600",
+      score: "text-slate-800",
+      scoreLabel: "text-slate-600",
+      badge: "bg-slate-800 text-white",
+      icon: "block",
+      title: "text-slate-900",
+      message: "text-slate-700 font-medium",
+      detailBox: "bg-slate-50 border-slate-300",
+      detailLabel: "text-slate-700",
+      detailText: "text-slate-900",
+      tagBox: "bg-slate-100 border-slate-300 text-slate-800",
+      tagIcon: "text-slate-700",
+      recommendationBox: "bg-white/80 border-slate-300",
+      recommendationTitle: "text-slate-900",
+      recommendationText: "text-slate-800",
+      metaText: "text-slate-700",
+    },
+    low: {
+      card: "border-green-500 bg-green-500/10",
+      ring: "border-green-600",
+      score: "text-green-700",
+      scoreLabel: "text-green-700",
+      badge: "bg-green-100 text-green-700",
+      icon: "verified",
+      title: "text-green-700",
+      message: "text-on-surface-variant",
+      detailBox: "bg-green-50 border-green-200",
+      detailLabel: "text-green-700",
+      detailText: "text-green-900",
+      tagBox: "bg-green-50 border-green-200 text-green-700",
+      tagIcon: "text-green-700",
+      recommendationBox: "bg-white/70 border-green-200",
+      recommendationTitle: "text-primary",
+      recommendationText: "text-on-surface",
+      metaText: "text-slate-600",
+    },
+    medium: {
+      card: "border-amber-500 bg-amber-50",
+      ring: "border-amber-500",
+      score: "text-amber-700",
+      scoreLabel: "text-amber-700",
+      badge: "bg-amber-100 text-amber-800",
+      icon: "warning",
+      title: "text-amber-800",
+      message: "text-amber-950 font-medium",
+      detailBox: "bg-amber-50 border-amber-300",
+      detailLabel: "text-amber-700",
+      detailText: "text-amber-950",
+      tagBox: "bg-amber-50 border-amber-300 text-amber-800",
+      tagIcon: "text-amber-700",
+      recommendationBox: "bg-white/80 border-amber-300",
+      recommendationTitle: "text-amber-800",
+      recommendationText: "text-amber-950",
+      metaText: "text-amber-800",
+    },
+    high: {
+      card: "border-red-600 bg-red-50",
+      ring: "border-red-600",
+      score: "text-red-700",
+      scoreLabel: "text-red-700",
+      badge: "bg-red-100 text-red-700",
+      icon: "warning",
+      title: "text-red-800",
+      message: "text-red-950 font-medium",
+      detailBox: "bg-red-50 border-red-300",
+      detailLabel: "text-red-700",
+      detailText: "text-red-950",
+      tagBox: "bg-red-50 border-red-200 text-red-700",
+      tagIcon: "text-red-700",
+      recommendationBox: "bg-white/80 border-red-300",
+      recommendationTitle: "text-red-800",
+      recommendationText: "text-red-950",
+      metaText: "text-red-800",
+    },
+  };
+
+  const currentSeverityStyle = severityStyles[severity];
+  const severityLabel =
+    severity === "invalid" ? "INVALID" : riskLevel.toUpperCase();
+
+  const resultTitle = isPhoneResult
+    ? !result.is_valid
+      ? "Invalid phone number"
+      : riskLevel === "high"
+        ? "Warning: High-risk phone number!"
+        : riskLevel === "medium"
+          ? "Warning: Suspicious phone number!"
+          : "Status: Low risk"
+    : severity === "high"
+      ? "Danger! Potential Fraud Alert."
+      : severity === "medium"
+        ? "Warning! Suspicious Content Detected."
+        : "Analysis Completed";
 
   return (
     <div className="bg-surface selection:bg-primary-fixed selection:text-on-primary-fixed min-h-screen text-on-surface">
@@ -272,11 +460,14 @@ const HomePage = () => {
         <section className="mb-16">
           <div className="max-w-3xl">
             <h1 className="text-5xl md:text-6xl font-black text-on-surface mb-6 tracking-tight leading-tight">
-              Check Suspicious Messages
+              {activeTab === "phone"
+                ? "Check Suspicious Phone Numbers"
+                : "Check Suspicious Messages"}
             </h1>
             <p className="text-xl md:text-2xl text-on-surface-variant font-light leading-relaxed">
-              Choose an input type and paste details below to instantly check
-              for scams with our Digital Concierge AI.
+              {activeTab === "phone"
+                ? "Enter a phone number below to check format validity, internal scam reports, and suspicious calling patterns."
+                : "Choose an input type and paste details below to instantly check for scams with our Digital Concierge AI."}
             </p>
           </div>
         </section>
@@ -446,6 +637,7 @@ const HomePage = () => {
     </div>
   )}
 
+<<<<<<< HEAD
 
   {error && (
     <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700 font-semibold">
@@ -469,6 +661,29 @@ const HomePage = () => {
   </span>
   {loading ? "Scanning..." : "Scan for Risk"}
 </button>
+=======
+            <button
+              onClick={handleScan}
+              disabled={loading}
+              className={`signature-gradient w-full py-6 rounded-xl flex items-center justify-center gap-4 text-on-primary text-2xl font-bold shadow-lg transform transition-all ${
+                loading ? "opacity-70 cursor-not-allowed" : "active:scale-95"
+              }`}
+            >
+              <span
+                className="material-symbols-outlined text-3xl"
+                data-icon="security"
+              >
+                security
+              </span>
+              {loading
+                ? "Scanning..."
+                : activeTab === "phone"
+                  ? "Check Phone Number"
+                  : activeTab === "text"
+                    ? "Scan Message"
+                    : "Scan for Risk"}
+            </button>
+>>>>>>> backend2
           </div>
 
           {/* Sidebar How it works */}
@@ -533,20 +748,14 @@ const HomePage = () => {
             </div>
 
             <div
-              className={`rounded-3xl overflow-hidden shadow-lg border-2 ${
-                isScam
-                  ? "border-error bg-error-container/10"
-                  : "border-green-500 bg-green-500/10"
-              }`}
+              className={`rounded-3xl overflow-hidden shadow-lg border-2 ${currentSeverityStyle.card}`}
             >
               <div className="p-8 md:p-12 grid grid-cols-1 md:grid-cols-3 gap-12 items-center">
                 <div className="flex flex-col items-center text-center">
                   <div className="relative w-48 h-48 flex items-center justify-center">
                     <div className="absolute inset-0 rounded-full border-[12px] border-surface-container-high"></div>
                     <div
-                      className={`absolute inset-0 rounded-full border-[12px] ${
-                        isScam ? "border-error" : "border-green-600"
-                      }`}
+                      className={`absolute inset-0 rounded-full border-[12px] ${currentSeverityStyle.ring}`}
                       style={{
                         clipPath:
                           "polygon(50% 50%, -10% -10%, 110% -10%, 110% 50%)",
@@ -555,48 +764,42 @@ const HomePage = () => {
                     ></div>
                     <div className="flex flex-col items-center">
                       <span
-                        className={`text-5xl font-black ${
-                          isScam ? "text-error" : "text-green-600"
-                        }`}
+                        className={`text-5xl font-black ${currentSeverityStyle.score}`}
                       >
                         {result.risk_score ?? "--"}
                       </span>
-                      <span className="text-lg font-bold text-outline uppercase tracking-widest">
+                      <span
+                        className={`text-lg font-bold uppercase tracking-widest ${currentSeverityStyle.scoreLabel}`}
+                      >
                         Risk Score
                       </span>
                     </div>
                   </div>
 
                   <div
-                    className={`mt-6 px-6 py-2 rounded-full font-bold flex items-center gap-2 ${
-                      isScam
-                        ? "bg-tertiary-container text-on-tertiary"
-                        : "bg-green-100 text-green-700"
-                    }`}
+                    className={`mt-6 px-6 py-2 rounded-full font-bold flex items-center gap-2 ${currentSeverityStyle.badge}`}
                   >
                     <span
                       className="material-symbols-outlined text-xl"
                       data-icon="warning"
                       style={{ fontVariationSettings: "'FILL' 1" }}
                     >
-                      {isScam ? "warning" : "verified"}
+                      {currentSeverityStyle.icon}
                     </span>
-                    {(riskLevel || "low").toUpperCase()}
+                    {severityLabel}
                   </div>
                 </div>
 
                 <div className="md:col-span-2">
                   <h3
-                    className={`text-3xl font-black mb-4 leading-tight ${
-                      isScam ? "text-error" : "text-green-700"
-                    }`}
+                    className={`text-3xl font-black mb-4 leading-tight ${currentSeverityStyle.title}`}
                   >
-                    {isScam
-                      ? "Danger! Potential Fraud Alert."
-                      : "Analysis Completed"}
+                    {resultTitle}
                   </h3>
 
-                  <p className="text-xl text-on-surface-variant mb-8 leading-relaxed">
+                  <p
+                    className={`text-xl mb-8 leading-relaxed ${currentSeverityStyle.message}`}
+                  >
                     {result.message}
                   </p>
                   {result.input_text && (
@@ -605,29 +808,75 @@ const HomePage = () => {
                     </p>
                   )}
 
+<<<<<<< HEAD
                   {result.translated_text && (
                     <p className="text-sm">
                       <b>English:</b> {result.translated_text}
                     </p>
                   )}
+=======
+                  {isTextResult && result.input_text && (
+                    <div
+                      className={`p-4 rounded-xl mb-5 border ${currentSeverityStyle.detailBox}`}
+                    >
+                      <p
+                        className={`text-sm font-semibold uppercase mb-1 ${currentSeverityStyle.detailLabel}`}
+                      >
+                        Analyzed content:
+                      </p>
+                      <p
+                        className={`italic ${currentSeverityStyle.detailText}`}
+                      >
+                        "{result.input_text}"
+                      </p>
+                    </div>
+                  )}
+
+                  {isPhoneResult && (
+                    <div
+                      className={`p-4 rounded-xl mb-5 border ${currentSeverityStyle.detailBox}`}
+                    >
+                      <p
+                        className={`text-sm font-semibold uppercase mb-2 ${currentSeverityStyle.detailLabel}`}
+                      >
+                        Analyzed phone number
+                      </p>
+
+                      <div className="space-y-1">
+                        <p className={currentSeverityStyle.detailText}>
+                          <strong>Input:</strong> {result.input_phone || "--"}
+                        </p>
+                        <p className={currentSeverityStyle.detailText}>
+                          <strong>Normalized:</strong>{" "}
+                          {result.normalized_phone || "--"}
+                        </p>
+                        <p className={currentSeverityStyle.detailText}>
+                          <strong>Display:</strong>{" "}
+                          {result.display_phone || "--"}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+>>>>>>> backend2
                   <div className="space-y-6">
                     {Array.isArray(result.matched_patterns) &&
                       result.matched_patterns.length > 0 && (
                         <div>
-                          <h4 className="text-sm font-bold text-outline uppercase mb-3 tracking-widest">
+                          <h4
+                            className={`text-sm font-bold uppercase mb-3 tracking-widest ${currentSeverityStyle.scoreLabel}`}
+                          >
                             Suspicious Elements Found
                           </h4>
                           <div className="flex flex-wrap gap-3">
                             {result.matched_patterns.map((item, index) => (
                               <span
                                 key={`${item}-${index}`}
-                                className={`px-4 py-2 rounded-lg font-medium text-lg flex items-center gap-2 border ${
-                                  isScam
-                                    ? "bg-red-50 border-red-200 text-red-700"
-                                    : "bg-green-50 border-green-200 text-green-700"
-                                }`}
+                                className={`px-4 py-2 rounded-lg font-medium text-lg flex items-center gap-2 border ${currentSeverityStyle.tagBox}`}
                               >
-                                <span className="material-symbols-outlined text-error text-xl">
+                                <span
+                                  className={`material-symbols-outlined text-xl ${currentSeverityStyle.tagIcon}`}
+                                >
                                   warning
                                 </span>
                                 {item}
@@ -638,24 +887,34 @@ const HomePage = () => {
                       )}
 
                     <div
-                      className={`p-6 rounded-2xl border space-y-3 ${
-                        isScam
-                          ? "bg-white/70 border-red-200"
-                          : "bg-white/70 border-green-200"
-                      }`}
+                      className={`p-6 rounded-2xl border space-y-3 ${currentSeverityStyle.recommendationBox}`}
                     >
                       {result.recommendation && (
                         <>
-                          <h4 className="text-xl font-bold text-primary">
+                          <h4
+                            className={`text-xl font-bold ${currentSeverityStyle.recommendationTitle}`}
+                          >
                             Our Recommendation
                           </h4>
-                          <p className="text-lg text-on-surface leading-relaxed">
+                          <p
+                            className={`text-lg leading-relaxed ${currentSeverityStyle.recommendationText}`}
+                          >
                             {result.recommendation}
                           </p>
                         </>
                       )}
 
-                      <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-600">
+                      {result.note && (
+                        <p
+                          className={`text-lg leading-relaxed ${currentSeverityStyle.recommendationText}`}
+                        >
+                          <strong>Note:</strong> {result.note}
+                        </p>
+                      )}
+
+                      <div
+                        className={`flex flex-wrap gap-x-6 gap-y-2 text-sm ${currentSeverityStyle.metaText}`}
+                      >
                         {result.engine && (
                           <span>
                             <strong>Engine:</strong> {result.engine}
@@ -666,22 +925,29 @@ const HomePage = () => {
                             <strong>Rule score:</strong> {result.rule_score}
                           </span>
                         )}
-                        {result.ml_probability != null && (
+                        {!isPhoneResult && result.ml_probability != null && (
                           <span>
                             <strong>ML probability:</strong>{" "}
                             {Math.round(result.ml_probability * 100)}%
                           </span>
                         )}
-                        {result.ml_prediction != null && (
+                        {!isPhoneResult && result.ml_prediction != null && (
                           <span>
                             <strong>ML prediction:</strong>{" "}
                             {result.ml_prediction}
                           </span>
                         )}
+                        {isPhoneResult && result.report_count != null && (
+                          <span>
+                            <strong>Report count:</strong> {result.report_count}
+                          </span>
+                        )}
                       </div>
 
                       {result.warning && (
-                        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-800">
+                        <div
+                          className={`rounded-xl border p-4 ${currentSeverityStyle.detailBox} ${currentSeverityStyle.detailText}`}
+                        >
                           {result.warning}
                         </div>
                       )}
@@ -689,18 +955,28 @@ const HomePage = () => {
                   </div>
 
                   <div className="mt-10 flex flex-col sm:flex-row gap-4">
-                    <button
-                      onClick={handleReportSender}
-                      className="flex-1 border-2 border-error text-error py-4 px-8 rounded-xl font-bold text-lg hover:bg-error-container/20 transition-colors flex items-center justify-center gap-3"
-                    >
-                      <span
-                        className="material-symbols-outlined"
-                        data-icon="report"
+                    {isScam && (
+                      <button
+                        onClick={handleReportSender}
+                        className={`flex-1 border-2 py-4 px-8 rounded-xl font-bold text-lg transition-colors flex items-center justify-center gap-3 ${
+                          severity === "high"
+                            ? "border-red-600 text-red-700 hover:bg-red-100"
+                            : severity === "medium"
+                              ? "border-amber-500 text-amber-700 hover:bg-amber-100"
+                              : "border-slate-500 text-slate-700 hover:bg-slate-100"
+                        }`}
                       >
-                        report
-                      </span>
-                      Report this sender
-                    </button>
+                        <span
+                          className="material-symbols-outlined"
+                          data-icon="report"
+                        >
+                          report
+                        </span>
+                        {isPhoneResult
+                          ? "Report this phone number"
+                          : "Report this sender"}
+                      </button>
+                    )}
 
                     <button
                       onClick={handleReset}
@@ -712,7 +988,9 @@ const HomePage = () => {
                       >
                         refresh
                       </span>
-                      Scan another message
+                      {isPhoneResult
+                        ? "Check another phone number"
+                        : "Scan another message"}
                     </button>
                   </div>
                 </div>
