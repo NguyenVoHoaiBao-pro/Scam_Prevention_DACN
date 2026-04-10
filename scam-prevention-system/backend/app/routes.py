@@ -6,10 +6,9 @@ import sqlite3
 from urllib.parse import urlencode
 import requests
 import pymysql
-from flask import jsonify
 import joblib
-import os
 import bcrypt
+from services.preprocess import preprocess_text
 
 # Load OAuth config
 with open(os.path.join(os.path.dirname(__file__), '..', 'config.json')) as f:
@@ -279,22 +278,24 @@ def health():
 # ==========================================
 # LOAD FILE AI MODEL
 # ==========================================
-# Đường dẫn chỉ đến file scam_model.pkl bạn vừa tạo
 MODEL_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'models_saved', 'scam_model.pkl')
+VECTORIZER_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'models_saved', 'tfidf_vectorizer.pkl')
 
 try:
     scam_model = joblib.load(MODEL_PATH)
-    print("Đã tải thành công AI Model!")
+    tfidf_vectorizer = joblib.load(VECTORIZER_PATH)
+    print("Da tai thanh cong AI Model va vectorizer!")
 except Exception as e:
     scam_model = None
-    print(f"Lỗi tải AI Model: {str(e)}. Hệ thống sẽ dùng từ khóa mặc định.")
+    tfidf_vectorizer = None
+    print(f"Loi tai AI assets: {str(e)}. He thong se dung tu khoa mac dinh.")
 
 # ==========================================
 # API ENDPOINT: Quét văn bản bằng AI
 # ==========================================
 @app.route("/api/detect-text", methods=["POST"])
 def detect_text():
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
     text = data.get("text", "")
 
     if not text.strip():
@@ -302,10 +303,15 @@ def detect_text():
 
     is_scam = False
 
-    if scam_model:
-        # DÙNG AI ĐỂ DỰ ĐOÁN (PREDICT)
-        prediction = scam_model.predict([text])[0] # AI trả về 1 hoặc 0
-        is_scam = bool(prediction == 1)
+    if scam_model and tfidf_vectorizer:
+        try:
+            processed_text = preprocess_text(text)
+            text_vector = tfidf_vectorizer.transform([processed_text])
+            prediction = scam_model.predict(text_vector)[0]
+            is_scam = bool(prediction == 1)
+        except Exception:
+            suspicious_keywords = ["otp", "chuyển khoản", "trúng thưởng", "click link", "xác minh tài khoản"]
+            is_scam = any(keyword.lower() in text.lower() for keyword in suspicious_keywords)
     else:
         # Nếu AI lỗi, dùng lại logic từ khóa cũ làm phương án dự phòng
         suspicious_keywords = ["otp", "chuyển khoản", "trúng thưởng", "click link", "xác minh tài khoản"]
