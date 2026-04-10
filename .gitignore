@@ -25,3 +25,9 @@ build/
 
 /package.json
 /package-lock.json
+*.pyc
+*.log
+scam-prevention-system/backend/config.json
+*.json
+/scam-prevention-system/backend/app/__pycache__
+>>>>>>> backend2
