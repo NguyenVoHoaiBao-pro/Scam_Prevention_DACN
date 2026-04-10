@@ -19,3 +19,4 @@ build/
 scam-prevention-system/backend/config.json
 *.json
 >>>>>>> backendlogin
+/scam-prevention-system/backend/app/__pycache__
