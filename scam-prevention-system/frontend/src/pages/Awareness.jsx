@@ -1,17 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // 1. Thêm useEffect
 import { Link } from 'react-router-dom';
 import '../index.css';
 
 const Awareness = () => {
-  // 1. Quản lý trạng thái Like cho 4 bài viết
-  const [likes, setLikes] = useState({
-    article1: { count: 142, isLiked: false },
-    article2: { count: 389, isLiked: false },
-    article3: { count: 256, isLiked: false },
-    article4: { count: 512, isLiked: false }
+  // 2. Sửa lại useState để đọc dữ liệu từ localStorage khi load trang
+  const [likes, setLikes] = useState(() => {
+    const savedLikes = localStorage.getItem('awareness_likes');
+    return savedLikes ? JSON.parse(savedLikes) : {
+      article1: { count: 142, isLiked: false },
+      article2: { count: 389, isLiked: false },
+      article3: { count: 256, isLiked: false },
+      article4: { count: 512, isLiked: false }
+    };
   });
 
-  // Hàm xử lý khi nhấn Like
+  // 3. Thêm useEffect để tự động lưu vào localStorage mỗi khi likes thay đổi
+  useEffect(() => {
+    localStorage.setItem('awareness_likes', JSON.stringify(likes));
+  }, [likes]);
+
+  // Hàm xử lý khi nhấn Like (Giữ nguyên logic của bạn)
   const handleToggleLike = (id) => {
     setLikes(prev => ({
       ...prev,
