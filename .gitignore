@@ -30,3 +30,4 @@ build/
 scam-prevention-system/backend/config.json
 *.json
 
+/scam-prevention-system/frontend/node_modules
