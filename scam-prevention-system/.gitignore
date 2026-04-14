@@ -1,23 +1,33 @@
-# Python virtual environment
+node_modules/
+**/node_modules/
+
 venv/
 **/venv/
-ENV/
 
-# Python cache
 __pycache__/
 **/__pycache__/
-*.pyc
 
-# Node.js
-node_modules/
-dist/
-
-# Environment & config
-.env
-*.env
-config.json
-
-# IDE
 .idea/
+**/.idea/
+
 .vscode/
-*.iml
+**/.vscode/
+
+.env
+*.pyc
+*.log
+
+dist/
+**/dist/
+
+build/
+**/build/
+
+/package.json
+/package-lock.json
+*.pyc
+*.log
+scam-prevention-system/backend/config.json
+*.json
+/scam-prevention-system/backend/app/__pycache__
+>>>>>>> backend2
