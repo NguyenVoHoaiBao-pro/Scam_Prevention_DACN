@@ -6,6 +6,9 @@ venv/
 
 __pycache__/
 **/__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
 .idea/
 **/.idea/
@@ -14,7 +17,6 @@ __pycache__/
 **/.vscode/
 
 .env
-*.pyc
 *.log
 
 dist/
@@ -25,8 +27,6 @@ build/
 
 /package.json
 /package-lock.json
-*.pyc
-*.log
-scam-prevention-system/backend/config.json
-*.json
 
+scam-prevention-system/backend/config.json
+scam-prevention-system/backend/auth.db
