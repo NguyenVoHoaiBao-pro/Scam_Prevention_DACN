@@ -606,12 +606,6 @@ const HomePage = () => {
                   )}
                 </div>
               )}
-
-            {audioFile && (
-              <p className="mt-4 text-sm text-green-600 text-center">
-                Selected: <span className="font-medium">{audioFile.name}</span>
-              </p>
-            )}
           </div>
 
             <button
@@ -753,11 +747,6 @@ const HomePage = () => {
                   >
                     {result.message}
                   </p>
-                  {result.input_text && (
-                    <p className="text-sm mt-2">
-                      <b>Transcript:</b> {result.input_text}
-                    </p>
-                  )}
 
                   {isTextResult && result.input_text && (
                     <div

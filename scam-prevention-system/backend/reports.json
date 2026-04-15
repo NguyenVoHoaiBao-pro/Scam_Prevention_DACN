@@ -48,5 +48,35 @@
     "email": null,
     "created_at": "2026-04-15T16:35:00.210073",
     "evidence": null
+  },
+  {
+    "id": 1776253602,
+    "title": "Warning! Suspicious Content Detected.",
+    "description": "N\u1ed9i dung nghi ng\u1edd: undefined\r\n\r\n\u0110\u00e1nh gi\u00e1 AI: This message contains some suspicious signs and should be reviewed carefully.",
+    "scam_type": "text",
+    "reporter_name": "Community User",
+    "email": null,
+    "created_at": "2026-04-15T18:46:42.202602",
+    "evidence": null
+  },
+  {
+    "id": 1776255412,
+    "title": "Warning! Suspicious Content Detected.",
+    "description": "N\u1ed9i dung nghi ng\u1edd: undefined\r\n\r\n\u0110\u00e1nh gi\u00e1 AI: Suspicious content suspected of being fraudulent!",
+    "scam_type": "audio",
+    "reporter_name": "Community User",
+    "email": null,
+    "created_at": "2026-04-15T19:16:52.418504",
+    "evidence": null
+  },
+  {
+    "id": 1776255412,
+    "title": "Warning! Suspicious Content Detected.",
+    "description": "N\u1ed9i dung nghi ng\u1edd: undefined\r\n\r\n\u0110\u00e1nh gi\u00e1 AI: Suspicious content suspected of being fraudulent!",
+    "scam_type": "audio",
+    "reporter_name": "Community User",
+    "email": null,
+    "created_at": "2026-04-15T19:16:52.732176",
+    "evidence": null
   }
 ]

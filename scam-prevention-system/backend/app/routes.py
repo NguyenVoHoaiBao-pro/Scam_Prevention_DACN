@@ -1,6 +1,9 @@
-from . import app
-from flask import jsonify, request, redirect
+
+from flask import Flask, jsonify, request, redirect
+from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
 import json
+from datetime import datetime
 import os
 import sqlite3
 from urllib.parse import urlencode
@@ -9,10 +12,26 @@ import joblib
 from .services.report_handler import save_report, get_reports
 import bcrypt
 from services.preprocess import preprocess_text
-
+from services.text_detector import analyze_text
+from services.phone_detector import analyze_phone
 
 from app.services.speech_to_text import process_audio_file
 from app.services.bank_lookup import check_bank_account
+
+# ====================== FLASK APP SETUP ======================
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///scam_reports.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Khởi tạo CORS ngay sau khi tạo app
+CORS(app, resources={r"/api/*": {"origins": ["http://localhost:5173", "http://127.0.0.1:5173"]}})
+#CORS(app)
+
+db = SQLAlchemy()
+db.init_app(app)
+
+with app.app_context():
+    db.create_all()
 
 # ==========================================
 # LOAD OAUTH CONFIG
@@ -23,6 +42,11 @@ with open(os.path.join(os.path.dirname(__file__), '..', 'config.json')) as f:
 FRONTEND_HOME_URL = oauth_config.get("FRONTEND_HOME_URL", "http://localhost:5173/")
 AUTH_DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'auth.db')
 
+
+def get_auth_db_connection():
+    connection = sqlite3.connect(AUTH_DB_PATH)
+    connection.row_factory = sqlite3.Row
+    return connection
 
 # ==========================================
 # USER LOGIN / REGISTER HELPER
@@ -49,12 +73,6 @@ def verify_password(plain_password, stored_password_hash):
 
 def looks_like_bcrypt_hash(value):
     return isinstance(value, str) and value.startswith(("$2a$", "$2b$", "$2y$"))
-
-
-def get_auth_db_connection():
-    connection = sqlite3.connect(AUTH_DB_PATH)
-    connection.row_factory = sqlite3.Row
-    return connection
 
 
 def init_auth_db():
@@ -169,7 +187,23 @@ def create_auth_user(username, email, password):
 
 init_auth_db()
 
+def init_warnings_table():
+    with get_auth_db_connection() as connection:
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS warnings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT NOT NULL,
+                content TEXT NOT NULL,
+                risk_level TEXT NOT NULL DEFAULT 'High',
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
+        connection.commit()
 
+
+init_warnings_table()
 # ==========================================
 # AUTH ROUTES
 # ==========================================
@@ -363,6 +397,7 @@ except Exception as e:
 # ==========================================
 # TEXT SCAM DETECTION
 # ==========================================
+"""
 @app.route("/api/detect-text", methods=["POST"])
 def detect_text():
     data = request.get_json(silent=True) or {}
@@ -395,7 +430,39 @@ def detect_text():
         "is_scam": is_scam,
         "message": "Phát hiện nội dung có dấu hiệu lừa đảo!" if is_scam else "Văn bản an toàn, không có dấu hiệu lừa đảo."
     })
+"""
+@app.route("/api/detect-text", methods=["POST"])
+def detect_text():
+    data = request.get_json(silent=True) or {}
+    text = (data.get("text") or "").strip()
 
+    if not text:
+        return jsonify({
+            "status": "error",
+            "error": "Missing required field: 'text'."
+        }), 400
+
+    result = analyze_text(text)
+    return jsonify(result), 200
+
+@app.route("/api/detect-phone", methods=["POST"])
+def detect_phone():
+    data = request.get_json(silent=True) or {}
+    phone = (data.get("phone") or "").strip()
+
+    if not phone:
+        return jsonify({
+            "status": "error",
+            "error": "Missing required field: 'phone'."
+        }), 400
+
+    result = analyze_phone(phone)
+    return jsonify(result), 200
+
+
+
+
+"""
 @app.route("/api/warnings", methods=["GET", "POST"])
 def handle_warnings():
     connection = None
@@ -443,3 +510,113 @@ def handle_warnings():
     finally:
         if connection:
             connection.close()
+"""
+@app.route("/api/warnings", methods=["GET", "POST"])
+def handle_warnings():
+    connection = None
+    try:
+        connection = get_auth_db_connection()
+        cursor = connection.cursor()
+
+        if request.method == "POST":
+            data = request.get_json(silent=True) or {}
+            title = (data.get("title") or "").strip()
+            content = (data.get("content") or "").strip()
+            risk_level = (data.get("risk_level") or "High").strip() or "High"
+
+            if not title or not content:
+                return jsonify({
+                    "status": "error",
+                    "message": "title and content are required"
+                }), 400
+
+            cursor.execute(
+                "INSERT INTO warnings (title, content, risk_level) VALUES (?, ?, ?)",
+                (title, content, risk_level),
+            )
+            connection.commit()
+
+            return jsonify({
+                "status": "success",
+                "message": "Warning saved successfully"
+            }), 201
+
+        cursor.execute(
+            "SELECT id, title, content, risk_level, created_at FROM warnings ORDER BY created_at DESC"
+        )
+        warnings = [dict(row) for row in cursor.fetchall()]
+
+        return jsonify({
+            "status": "success",
+            "data": warnings
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": f"Database error: {str(e)}"
+        }), 500
+    finally:
+        if connection:
+            connection.close()
+
+@app.route("/api/check-bank-account", methods=["POST"])
+def check_bank_account_route():
+    try:
+        data = request.get_json(silent=True) or {}
+        bank_name = data.get("bank_name")
+        account_number = data.get("account_number")
+
+        if not bank_name or not account_number:
+            return jsonify({
+                "status": "error",
+                "message": "bank_name and account_number are required"
+            }), 400
+
+        # Gọi hàm từ service
+        result = check_bank_account(bank_name, account_number)
+
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+    
+# ==========================================
+# AUDIO / VOICE SCAM DETECTION (Voice to Text)
+# ==========================================
+@app.route("/api/check-audio", methods=["POST"])
+def check_audio():
+    try:
+        if 'audio' not in request.files:
+            return jsonify({
+                "success": False,
+                "message": "No audio file uploaded"
+            }), 400
+
+        audio_file = request.files['audio']
+
+        if audio_file.filename == '':
+            return jsonify({
+                "success": False,
+                "message": "No selected file"
+            }), 400
+
+        # Gọi hàm xử lý audio từ speech_to_text.py
+        result = process_audio_file(audio_file)
+
+        if not result.get("success", False):
+            return jsonify(result), 400
+
+        # Thêm type để frontend nhận biết
+        result["type"] = "audio"
+        
+        return jsonify(result), 200
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "success": False,
+            "message": f"Server error: {str(e)}"
+        }), 500
