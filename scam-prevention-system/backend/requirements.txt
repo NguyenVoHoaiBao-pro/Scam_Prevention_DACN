@@ -1,11 +1,6 @@
 requests
 flask
 flask-cors
-<<<<<<< HEAD
-<<<<<<< HEAD
-flask_sqlalchemy
-=======
 
->>>>>>> text-scam
-=======
->>>>>>> awarenesshub
+flask_sqlalchemy
+
