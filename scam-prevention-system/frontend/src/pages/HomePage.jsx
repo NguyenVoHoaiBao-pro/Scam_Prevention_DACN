@@ -21,6 +21,7 @@ const HomePage = () => {
     if (!base) console.warn("Missing API base URL");
     return (base || "http://localhost:5000").replace(/\/$/, "");
   }, []);
+
   const handleBankScan = async () => {
     try {
       if (!bankAccount.trim() || !selectedBank) {
@@ -565,29 +566,9 @@ const HomePage = () => {
                     value={bankAccount}
                     onChange={(e) => setBankAccount(e.target.value)}
                   />
+                
                 </div>
               )}
-  {activeTab === "audio" && (
-    <div>
-      <div
-        className="w-full p-12 bg-surface-container-highest border-4 border-dashed border-outline-variant rounded-xl flex flex-col items-center justify-center gap-4 text-center group cursor-pointer hover:bg-surface-container-high transition-colors"
-        onClick={() => document.getElementById("audioUpload").click()}
-      >
-        <span
-          className="material-symbols-outlined text-6xl text-outline group-hover:text-primary transition-colors"
-          data-icon="upload_file"
-        >
-          upload_file
-        </span>
-        <div>
-          <p className="text-xl font-bold text-on-surface">
-            Drag and drop audio file here
-          </p>
-          <p className="text-on-surface-variant mt-2">
-            Supports .mp3, .wav, .m4a (Max 10MB)
-          </p>
-        </div>
-      </div>
 
               {activeTab === "audio" && (
                 <div>
@@ -626,13 +607,12 @@ const HomePage = () => {
                 </div>
               )}
 
-      {audioFile && (
-        <p className="mt-4 text-sm text-green-600 text-center">
-          Selected: <span className="font-medium">{audioFile.name}</span>
-        </p>
-      )}
-    </div>
-  )}
+            {audioFile && (
+              <p className="mt-4 text-sm text-green-600 text-center">
+                Selected: <span className="font-medium">{audioFile.name}</span>
+              </p>
+            )}
+          </div>
 
             <button
               onClick={handleScan}
@@ -659,14 +639,14 @@ const HomePage = () => {
 
           {/* Sidebar How it works */}
           <div className="lg:col-span-5 h-full">
-            <aside className="sticky top-28">
+          
               <div className="bg-surface-container-low rounded-2xl p-8 h-full flex flex-col justify-between shadow-lg border border-primary/10">
                 <div>
                   <h2 className="text-2xl font-bold text-primary mb-6 text-center lg:text-left">
                     How it works
                   </h2>
                   <ul className="space-y-6">
-                    <li className="flex gap-4 items-center">
+                    <li className="flex gap-4">
                       <span className="bg-primary-fixed text-primary w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center font-bold">
                         1
                       </span>
@@ -675,7 +655,7 @@ const HomePage = () => {
                         tricks used by fraudsters.
                       </p>
                     </li>
-                    <li className="flex gap-4 items-center">
+                    <li className="flex gap-4">
                       <span className="bg-primary-fixed text-primary w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center font-bold">
                         2
                       </span>
@@ -684,7 +664,7 @@ const HomePage = () => {
                         malicious activity.
                       </p>
                     </li>
-                    <li className="flex gap-4 items-center">
+                    <li className="flex gap-4">
                       <span className="bg-primary-fixed text-primary w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center font-bold">
                         3
                       </span>
@@ -704,7 +684,7 @@ const HomePage = () => {
                   />
                 </div>
               </div>
-            </aside>
+        
           </div>
         </div>
 
@@ -984,7 +964,7 @@ const HomePage = () => {
             <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
           </div>
         </section>
-        </div>
+        
       </main>
 
       <footer className="bg-slate-100 dark:bg-slate-950 w-full py-12 px-8 mt-20">
