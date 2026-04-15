@@ -21,13 +21,13 @@ VECTORIZER_PATH = MODEL_DIR / "tfidf_vectorizer.pkl"
 
 def load_dataset():
     if not DATA_PATH.exists():
-        raise FileNotFoundError(f"Không tìm thấy dataset tại: {DATA_PATH}")
+        raise FileNotFoundError(f"Dataset not found at: {DATA_PATH}")
 
     df = pd.read_csv(DATA_PATH)
 
     required_columns = {"text", "label"}
     if not required_columns.issubset(df.columns):
-        raise ValueError("CSV phải có 2 cột: text, label")
+        raise ValueError("CSV must contain 2 columns: text and label")
 
     df = df.dropna(subset=["text", "label"]).copy()
     df["text"] = df["text"].astype(str).str.strip()
@@ -38,11 +38,11 @@ def load_dataset():
 
 
 def main():
-    print(f"Đang đọc dữ liệu từ: {DATA_PATH}")
+    print(f"Reading dataset from: {DATA_PATH}")
     df = load_dataset()
 
-    print(f"Tổng số mẫu: {len(df)}")
-    print("Phân bố nhãn:")
+    print(f"Total samples: {len(df)}")
+    print("Label distribution:")
     print(df["label"].value_counts())
 
     df["processed_text"] = df["text"].apply(preprocess_text)
@@ -80,8 +80,8 @@ def main():
     joblib.dump(model, MODEL_PATH)
     joblib.dump(vectorizer, VECTORIZER_PATH)
 
-    print(f"Đã lưu model tại: {MODEL_PATH}")
-    print(f"Đã lưu vectorizer tại: {VECTORIZER_PATH}")
+    print(f"Model saved to: {MODEL_PATH}")
+    print(f"Vectorizer saved to: {VECTORIZER_PATH}")
 
 
 if __name__ == "__main__":

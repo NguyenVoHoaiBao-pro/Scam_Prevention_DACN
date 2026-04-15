@@ -51,6 +51,7 @@ function Register() {
       }
 
       setSuccessMessage(result.message || "Registration successful");
+      navigate("/login");
     } catch (error) {
       setErrorMessage(error.message || "Unable to register right now.");
     } finally {

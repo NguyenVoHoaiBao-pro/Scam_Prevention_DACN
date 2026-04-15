@@ -1,6 +1,8 @@
-requests
 flask
 flask-cors
-
-flask_sqlalchemy
-
+requests
+pymysql
+joblib
+bcrypt
+pandas
+scikit-learn
