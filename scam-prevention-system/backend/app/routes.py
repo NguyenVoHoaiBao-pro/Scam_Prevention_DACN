@@ -5,16 +5,13 @@ import os
 import sqlite3
 from urllib.parse import urlencode
 import requests
-<<<<<<< HEAD
 import pymysql
 import joblib
 import os
 from .services.report_handler import save_report, get_reports
-=======
 import joblib
 import bcrypt
 from services.preprocess import preprocess_text
->>>>>>> backend2
 
 from app.services.speech_to_text import process_audio_file
 from app.services.bank_lookup import check_bank_account
@@ -29,7 +26,6 @@ FRONTEND_HOME_URL = oauth_config.get("FRONTEND_HOME_URL", "http://localhost:5173
 AUTH_DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'auth.db')
 
 
-<<<<<<< HEAD
 # ==========================================
 # USER LOGIN / REGISTER HELPER
 # ==========================================
@@ -37,10 +33,8 @@ def load_valid_users():
     users_path = os.path.join(os.path.dirname(__file__), '..', 'valid_users.json')
     with open(users_path, encoding="utf-8") as f:
         return json.load(f)
-=======
 def hash_password(password):
     return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
->>>>>>> backend2
 
 
 def verify_password(plain_password, stored_password_hash):
@@ -385,11 +379,6 @@ def detect_text():
 
     is_scam = False
 
-<<<<<<< HEAD
-    if scam_model:
-        prediction = scam_model.predict([text])[0]
-        is_scam = bool(prediction == 1)
-=======
     if scam_model and tfidf_vectorizer:
         try:
             processed_text = preprocess_text(text)
@@ -399,7 +388,6 @@ def detect_text():
         except Exception:
             suspicious_keywords = ["otp", "chuyển khoản", "trúng thưởng", "click link", "xác minh tài khoản"]
             is_scam = any(keyword.lower() in text.lower() for keyword in suspicious_keywords)
->>>>>>> backend2
     else:
         suspicious_keywords = ["otp", "chuyển khoản", "trúng thưởng", "click link", "xác minh tài khoản"]
         is_scam = any(keyword.lower() in text.lower() for keyword in suspicious_keywords)
@@ -410,43 +398,10 @@ def detect_text():
         "message": "Phát hiện nội dung có dấu hiệu lừa đảo!" if is_scam else "Văn bản an toàn, không có dấu hiệu lừa đảo."
     })
 
-<<<<<<< HEAD
-
-# ==========================================
-# DATABASE CONNECTION
-# ==========================================
-def get_db_connection():
-    return pymysql.connect(
-        host='localhost',
-        user='root',
-        password='12345',
-        database='scam_prevention_db',
-        cursorclass=pymysql.cursors.DictCursor
-    )
-
-
-# ==========================================
-# WARNINGS API (DATABASE)
-# ==========================================
-=======
->>>>>>> backend2
 @app.route("/api/warnings", methods=["GET", "POST"])
 def handle_warnings():
     connection = None
     try:
-<<<<<<< HEAD
-        connection = get_db_connection()
-        with connection.cursor() as cursor:
-            if request.method == "POST":
-                data = request.get_json(silent=True) or {}
-                title = data.get("title")
-                content = data.get("content")
-                risk_level = data.get("risk_level", "High")
-
-                sql = "INSERT INTO warnings (title, content, risk_level) VALUES (%s, %s, %s)"
-                cursor.execute(sql, (title, content, risk_level))
-                connection.commit()
-=======
         connection = get_auth_db_connection()
         cursor = connection.cursor()
             # NẾU LÀ GỬI BÁO CÁO MỚI TỪ TRANG SCAN
@@ -455,7 +410,6 @@ def handle_warnings():
             title = (data.get("title") or "").strip()
             content = (data.get("content") or "").strip()
             risk_level = (data.get("risk_level") or "High").strip() or "High"
->>>>>>> backend2
 
             if not title or not content:
                 return jsonify({
@@ -463,16 +417,9 @@ def handle_warnings():
                     "message": "title and content are required"
                 }), 400
 
-<<<<<<< HEAD
-            elif request.method == "GET":
-                sql = "SELECT id, title, content, risk_level, created_at FROM warnings ORDER BY created_at DESC"
-                cursor.execute(sql)
-                warnings = cursor.fetchall()
-=======
             sql = "INSERT INTO warnings (title, content, risk_level) VALUES (?, ?, ?)"
             cursor.execute(sql, (title, content, risk_level))
             connection.commit()
->>>>>>> backend2
 
             return jsonify({
                 "status": "success",
@@ -496,73 +443,5 @@ def handle_warnings():
         }), 500
 
     finally:
-<<<<<<< HEAD
-        if connection and connection.open:
-            connection.close()
-
-
-# ==========================================
-# AUDIO CHECK API (NO DATABASE)
-# ==========================================
-# ==========================================
-# AUDIO CHECK API (NO DATABASE)
-# ==========================================
-@app.route("/api/check-audio", methods=["POST"])
-def check_audio():
-    try:
-        if "audio" not in request.files:
-            return jsonify({
-                "success": False,
-                "message": "Không tìm thấy file audio trong request"
-            }), 400
-
-        audio_file = request.files["audio"]
-        result = process_audio_file(audio_file)
-
-        if not result["success"]:
-            return jsonify(result), 400
-
-        return jsonify(result), 200
-
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "message": f"Lỗi server: {str(e)}"
-        }), 500
-
-
-# ==========================================
-# BANK ACCOUNT CHECK API (NO DATABASE)
-# ==========================================
-@app.route("/api/check-bank-account", methods=["POST"])
-def check_bank_account_api():
-    try:
-        data = request.get_json(silent=True) or {}
-
-        if not data:
-            return jsonify({
-                "success": False,
-                "message": "Không nhận được dữ liệu JSON"
-            }), 400
-
-        bank_name = data.get("bank_name", "").strip()
-        account_number = data.get("account_number", "").strip()
-
-        if not bank_name or not account_number:
-            return jsonify({
-                "success": False,
-                "message": "Thiếu bank_name hoặc account_number"
-            }), 400
-
-        result = check_bank_account(bank_name, account_number)
-        return jsonify(result), 200
-
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "message": f"Lỗi server: {str(e)}"
-        }), 500
-=======
         if connection:
             connection.close()
->>>>>>> backend2

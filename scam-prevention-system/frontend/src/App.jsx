@@ -1,8 +1,6 @@
-<<<<<<< HEAD
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-=======
+
 import { Routes, Route, Navigate } from 'react-router-dom';
->>>>>>> backend2
+
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import HomePage from "./pages/HomePage";

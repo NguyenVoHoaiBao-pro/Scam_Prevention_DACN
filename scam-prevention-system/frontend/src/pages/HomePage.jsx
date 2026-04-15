@@ -21,33 +21,6 @@ const HomePage = () => {
     if (!base) console.warn("Missing API base URL");
     return (base || "http://localhost:5000").replace(/\/$/, "");
   }, []);
-  const handleTextScan = async () => {
-    if (!textInput.trim()) {
-      setError("Please enter the content.");
-      return;
-    }
-    try {
-      setLoading(true);
-
-      const response = await fetch(`${API_BASE}/api/detect-text`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ text: textInput }),
-      });
-
-      const data = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        throw new Error(data.message || "Unable to connect to the server.");
-      }
-
-      setResult(data);
-    } finally {
-      setLoading(false);
-    }
-  };
   const handleBankScan = async () => {
     try {
       if (!bankAccount.trim() || !selectedBank) {
@@ -135,18 +108,6 @@ const HomePage = () => {
 
     try {
       if (activeTab === "text") {
-<<<<<<< HEAD
-        await handleTextScan();
-      } else if (activeTab === "bank") {
-        await handleBankScan();
-      } else if (activeTab === "audio") {
-        await handleAudioScan();
-      } else if (activeTab === "phone") {
-        setError("Function not yet supported");
-      }
-    } catch (err) {
-      setError(err.message || "An error has occurred.");
-=======
         if (!textInput.trim()) {
           setError("Please enter the message content to check.");
           return;
@@ -203,16 +164,12 @@ const HomePage = () => {
       }
 
       if (activeTab === "bank") {
-        setError(
-          "Only text message and phone number checks are supported right now.",
-        );
+        await handleBankScan();
         return;
       }
 
       if (activeTab === "audio") {
-        setError(
-          "Only text message and phone number checks are supported right now.",
-        );
+        await handleAudioScan();
         return;
       }
 
@@ -221,7 +178,6 @@ const HomePage = () => {
       );
     } catch (err) {
       setError(err.message || "An unexpected error occurred.");
->>>>>>> backend2
     } finally {
       setLoading(false);
     }
@@ -244,13 +200,9 @@ const HomePage = () => {
       message:
         activeTab === "text"
           ? textInput
-<<<<<<< HEAD
-          : result?.input_text || "",
-=======
           : activeTab === "phone"
             ? `Phone number checked: ${result.display_phone || result.input_phone || phoneInput}`
             : result?.message || "",
->>>>>>> backend2
       reportContent: {
         title: resultTitle,
         description: result.message || "",
@@ -474,6 +426,19 @@ const HomePage = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           <div className="lg:col-span-7 bg-surface-container-lowest rounded-xl p-8 shadow-sm">
+            {error && (
+              <div className="mb-6 p-4 rounded-xl bg-red-50 border-2 border-red-300 text-red-800 font-medium">
+                <div className="flex items-start gap-3">
+                  <span
+                    className="material-symbols-outlined text-xl flex-shrink-0 mt-0.5"
+                    style={{ fontVariationSettings: "'FILL' 1" }}
+                  >
+                    error
+                  </span>
+                  <p>{error}</p>
+                </div>
+              </div>
+            )}
             <div className="mb-8">
               <label className="block text-sm font-bold text-primary mb-6 uppercase tracking-widest">
                 Input Analysis Field
@@ -637,31 +602,6 @@ const HomePage = () => {
     </div>
   )}
 
-<<<<<<< HEAD
-
-  {error && (
-    <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700 font-semibold">
-      {error}
-    </div>
-  )}
-</div>
-
-<button
-  onClick={handleScan}
-  disabled={loading}
-  className={`signature-gradient w-full py-6 rounded-xl flex items-center justify-center gap-4 text-on-primary text-2xl font-bold shadow-lg transform transition-all ${
-    loading ? "opacity-70 cursor-not-allowed" : "active:scale-95"
-  }`}
->
-  <span
-    className="material-symbols-outlined text-3xl"
-    data-icon="security"
-  >
-    security
-  </span>
-  {loading ? "Scanning..." : "Scan for Risk"}
-</button>
-=======
             <button
               onClick={handleScan}
               disabled={loading}
@@ -683,7 +623,6 @@ const HomePage = () => {
                     ? "Scan Message"
                     : "Scan for Risk"}
             </button>
->>>>>>> backend2
           </div>
 
           {/* Sidebar How it works */}
@@ -808,13 +747,6 @@ const HomePage = () => {
                     </p>
                   )}
 
-<<<<<<< HEAD
-                  {result.translated_text && (
-                    <p className="text-sm">
-                      <b>English:</b> {result.translated_text}
-                    </p>
-                  )}
-=======
                   {isTextResult && result.input_text && (
                     <div
                       className={`p-4 rounded-xl mb-5 border ${currentSeverityStyle.detailBox}`}
@@ -858,7 +790,6 @@ const HomePage = () => {
                     </div>
                   )}
 
->>>>>>> backend2
                   <div className="space-y-6">
                     {Array.isArray(result.matched_patterns) &&
                       result.matched_patterns.length > 0 && (
@@ -1021,6 +952,7 @@ const HomePage = () => {
             <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
           </div>
         </section>
+        </div>
       </main>
 
       <footer className="bg-slate-100 dark:bg-slate-950 w-full py-12 px-8 mt-20">

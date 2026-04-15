@@ -4,14 +4,11 @@ import sqlite3
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from services.text_detector import analyze_text
-<<<<<<< HEAD
 from flask import jsonify
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 import os
-=======
 from services.phone_detector import analyze_phone
->>>>>>> backend2
 
 from app.models.report import db
 
