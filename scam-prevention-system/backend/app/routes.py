@@ -5,13 +5,11 @@ import os
 import sqlite3
 from urllib.parse import urlencode
 import requests
-import pymysql
 import joblib
-import os
 from .services.report_handler import save_report, get_reports
-import joblib
 import bcrypt
 from services.preprocess import preprocess_text
+
 
 from app.services.speech_to_text import process_audio_file
 from app.services.bank_lookup import check_bank_account

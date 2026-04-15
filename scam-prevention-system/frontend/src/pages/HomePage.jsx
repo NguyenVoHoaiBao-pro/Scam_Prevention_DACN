@@ -122,7 +122,7 @@ const HomePage = () => {
           },
           body: JSON.stringify({ text: textInput }),
         });
-
+    
         const data = await response.json().catch(() => ({}));
 
         if (!response.ok) {
@@ -222,7 +222,10 @@ const HomePage = () => {
     setTextInput("");
     setPhoneInput("");
     setBankAccount("");
-    document.getElementById("audioUpload").value = "";
+    setAudioFile(null);
+    if (document.getElementById("audioUpload")) {
+      document.getElementById("audioUpload").value = "";
+    }
     setError("");
     setResult(null);
     setSelectedBank("");
@@ -586,13 +589,42 @@ const HomePage = () => {
         </div>
       </div>
 
-      <input
-        type="file"
-        accept=".mp3,.wav,.m4a"
-        className="hidden"
-        id="audioUpload"
-        onChange={(e) => setAudioFile(e.target.files?.[0] || null)}
-      />
+              {activeTab === "audio" && (
+                <div>
+                  <div className="w-full p-12 bg-surface-container-highest border-4 border-dashed border-outline-variant rounded-xl flex flex-col items-center justify-center gap-4 text-center group cursor-pointer hover:bg-surface-container-high transition-colors"
+                  onClick={() => document.getElementById("audioUpload").click()}>
+                    <span
+                      className="material-symbols-outlined text-6xl text-outline group-hover:text-primary transition-colors"
+                      data-icon="upload_file"
+                    >
+                      upload_file
+                    </span>
+                    <div>
+                      <p className="text-xl font-bold text-on-surface">
+                        Drag and drop audio file here
+                      </p>
+                      <p className="text-on-surface-variant mt-2">
+                        Supports .mp3, .wav, .m4a (Max 10MB)
+                      </p>
+                      <input
+                        type="file"
+                        accept=".mp3,.wav,.m4a"
+                        className="hidden"
+                        id="audioUpload"
+                        onChange={(e) =>
+                          setAudioFile(e.target.files?.[0] || null)
+                        }
+                      />
+                    </div>
+                  </div>
+                  {/* Hiển thị tên file → audioFile được sử dụng ở đây */}
+                  {audioFile && (
+                    <p className="mt-4 text-sm text-green-600 text-center">
+                      Selected: <span className="font-medium">{audioFile.name}</span>
+                    </p>
+                  )}
+                </div>
+              )}
 
       {audioFile && (
         <p className="mt-4 text-sm text-green-600 text-center">
