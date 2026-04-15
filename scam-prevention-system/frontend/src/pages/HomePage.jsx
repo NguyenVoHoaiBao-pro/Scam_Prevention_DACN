@@ -146,6 +146,9 @@ const HomePage = () => {
     setPhoneInput("");
     setBankAccount("");
     setAudioFile(null);
+    if (document.getElementById("audioUpload")) {
+      document.getElementById("audioUpload").value = "";
+    }
     setError("");
     setResult(null);
   };
@@ -469,7 +472,8 @@ const HomePage = () => {
 
               {activeTab === "audio" && (
                 <div>
-                  <div className="w-full p-12 bg-surface-container-highest border-4 border-dashed border-outline-variant rounded-xl flex flex-col items-center justify-center gap-4 text-center group cursor-pointer hover:bg-surface-container-high transition-colors">
+                  <div className="w-full p-12 bg-surface-container-highest border-4 border-dashed border-outline-variant rounded-xl flex flex-col items-center justify-center gap-4 text-center group cursor-pointer hover:bg-surface-container-high transition-colors"
+                  onClick={() => document.getElementById("audioUpload").click()}>
                     <span
                       className="material-symbols-outlined text-6xl text-outline group-hover:text-primary transition-colors"
                       data-icon="upload_file"
@@ -486,12 +490,20 @@ const HomePage = () => {
                       <input
                         type="file"
                         accept=".mp3,.wav,.m4a"
+                        className="hidden"
+                        id="audioUpload"
                         onChange={(e) =>
                           setAudioFile(e.target.files?.[0] || null)
                         }
                       />
                     </div>
                   </div>
+                  {/* Hiển thị tên file → audioFile được sử dụng ở đây */}
+                  {audioFile && (
+                    <p className="mt-4 text-sm text-green-600 text-center">
+                      Selected: <span className="font-medium">{audioFile.name}</span>
+                    </p>
+                  )}
                 </div>
               )}
 
