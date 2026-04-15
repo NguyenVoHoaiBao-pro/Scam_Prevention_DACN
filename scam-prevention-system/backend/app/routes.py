@@ -6,10 +6,17 @@ import sqlite3
 from urllib.parse import urlencode
 import requests
 import joblib
+from .services.report_handler import save_report, get_reports
 import bcrypt
 from services.preprocess import preprocess_text
 
-# Load OAuth config
+
+from app.services.speech_to_text import process_audio_file
+from app.services.bank_lookup import check_bank_account
+
+# ==========================================
+# LOAD OAUTH CONFIG
+# ==========================================
 with open(os.path.join(os.path.dirname(__file__), '..', 'config.json')) as f:
     oauth_config = json.load(f)
 
@@ -17,6 +24,13 @@ FRONTEND_HOME_URL = oauth_config.get("FRONTEND_HOME_URL", "http://localhost:5173
 AUTH_DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'auth.db')
 
 
+# ==========================================
+# USER LOGIN / REGISTER HELPER
+# ==========================================
+def load_valid_users():
+    users_path = os.path.join(os.path.dirname(__file__), '..', 'valid_users.json')
+    with open(users_path, encoding="utf-8") as f:
+        return json.load(f)
 def hash_password(password):
     return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
@@ -156,6 +170,9 @@ def create_auth_user(username, email, password):
 init_auth_db()
 
 
+# ==========================================
+# AUTH ROUTES
+# ==========================================
 @app.route("/api/auth/login", methods=["POST"])
 def email_password_login():
     data = request.get_json(silent=True) or {}
@@ -224,6 +241,7 @@ def google_callback():
     code = request.args.get("code")
     if not code:
         return jsonify({"error": "Missing code"}), 400
+
     token_url = "https://oauth2.googleapis.com/token"
     data = {
         "code": code,
@@ -232,12 +250,14 @@ def google_callback():
         "redirect_uri": oauth_config["GOOGLE_REDIRECT_URI"],
         "grant_type": "authorization_code"
     }
+
     token_resp = requests.post(token_url, data=data)
     token_json = token_resp.json()
     access_token = token_json.get("access_token")
+
     if not access_token:
         return jsonify({"error": "Failed to obtain access token", "details": token_json}), 400
-    # OAuth completed, send user back to homepage.
+
     return redirect(FRONTEND_HOME_URL)
 
 
@@ -246,7 +266,7 @@ def facebook_login():
     params = {
         "client_id": oauth_config["FACEBOOK_CLIENT_ID"],
         "redirect_uri": oauth_config["FACEBOOK_REDIRECT_URI"],
-        "state": "random_state_string",  # Should be random in production
+        "state": "random_state_string",
         "scope": "email,public_profile"
     }
     url = f"https://www.facebook.com/v17.0/dialog/oauth?{urlencode(params)}"
@@ -258,6 +278,7 @@ def facebook_callback():
     code = request.args.get("code")
     if not code:
         return jsonify({"error": "Missing code"}), 400
+
     token_url = "https://graph.facebook.com/v17.0/oauth/access_token"
     params = {
         "client_id": oauth_config["FACEBOOK_CLIENT_ID"],
@@ -265,28 +286,66 @@ def facebook_callback():
         "client_secret": oauth_config["FACEBOOK_CLIENT_SECRET"],
         "code": code
     }
+
     token_resp = requests.get(token_url, params=params)
     token_json = token_resp.json()
     access_token = token_json.get("access_token")
+
     if not access_token:
         return jsonify({"error": "Failed to obtain access token", "details": token_json}), 400
-    # OAuth completed, send user back to homepage.
+
     return redirect(FRONTEND_HOME_URL)
 
+
+# ==========================================
+# BASIC ROUTES
+# ==========================================
 @app.route("/")
 def home():
     return jsonify({
         "message": "Scam Prevention Backend is running!"
     })
 
+
 @app.route("/api/health")
 def health():
     return jsonify({
         "status": "ok"
     })
+# Route để lấy danh sách Reports (GET)
+@app.route("/api/reports", methods=["GET"])
+def fetch_reports():
+    try:
+        reports = get_reports()
+        # React đang mong đợi một mảng trực tiếp: setWarnings(result);
+        return jsonify(reports), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
+# Route để lưu Report mới (POST)
+@app.route("/api/report", methods=["POST"])
+def create_report():
+    try:
+        # gửi bằng FormData nên phải dùng request.form ở Flask
+        data = request.form
+        
+        # Hàm save_report cần 2 tham số: data và file
+        # Nếu React không gửi file đính kèm, request.files.get('file') sẽ trả về None
+        file = request.files.get('file') 
+        
+        report = save_report(data, file)
+        
+        # Trả về status success để React nhận biết (if response.ok)
+        return jsonify({
+            "status": "success", 
+            "message": "Report saved successfully",
+            "data": report
+        }), 201
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    
 # ==========================================
-# LOAD FILE AI MODEL
+# LOAD AI MODEL
 # ==========================================
 MODEL_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'models_saved', 'scam_model.pkl')
 VECTORIZER_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'models_saved', 'tfidf_vectorizer.pkl')
@@ -300,8 +359,9 @@ except Exception as e:
     tfidf_vectorizer = None
     print(f"Loi tai AI assets: {str(e)}. He thong se dung tu khoa mac dinh.")
 
+
 # ==========================================
-# API ENDPOINT: Quét văn bản bằng AI
+# TEXT SCAM DETECTION
 # ==========================================
 @app.route("/api/detect-text", methods=["POST"])
 def detect_text():
@@ -309,7 +369,11 @@ def detect_text():
     text = data.get("text", "")
 
     if not text.strip():
-        return jsonify({"input_text": text, "is_scam": False, "message": "Vui lòng nhập nội dung."})
+        return jsonify({
+            "input_text": text,
+            "is_scam": False,
+            "message": "Vui lòng nhập nội dung."
+        })
 
     is_scam = False
 
@@ -323,7 +387,6 @@ def detect_text():
             suspicious_keywords = ["otp", "chuyển khoản", "trúng thưởng", "click link", "xác minh tài khoản"]
             is_scam = any(keyword.lower() in text.lower() for keyword in suspicious_keywords)
     else:
-        # Nếu AI lỗi, dùng lại logic từ khóa cũ làm phương án dự phòng
         suspicious_keywords = ["otp", "chuyển khoản", "trúng thưởng", "click link", "xác minh tài khoản"]
         is_scam = any(keyword.lower() in text.lower() for keyword in suspicious_keywords)
 

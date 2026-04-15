@@ -1,12 +1,15 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles.css";
 
 export default function ScanContent() {
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
 
   const [text, setText] = useState("");
+  const [audioFile, setAudioFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [audioLoading, setAudioLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [reportStatus, setReportStatus] = useState("idle");
@@ -57,6 +60,65 @@ export default function ScanContent() {
       setLoading(false);
     }
   };
+  const handleChooseFile = () => {
+  if (fileInputRef.current) {
+    fileInputRef.current.click();
+  }
+};
+
+const handleFileChange = (e) => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+
+  const isValid = /\.(mp3|wav|m4a|webm)$/i.test(file.name);
+  if (!isValid) {
+    setError("Chỉ hỗ trợ file MP3, WAV, M4A, WEBM");
+    setAudioFile(null);
+    e.target.value = "";
+    return;
+  }
+
+  setError(null);
+  setAudioFile(file);
+};
+
+const handleAudioScan = async () => {
+  if (!audioFile) {
+    setError("Vui lòng chọn file audio trước!");
+    return;
+  }
+
+  setAudioLoading(true);
+  setError(null);
+  setResult(null);
+  setReportStatus("idle");
+
+  try {
+    const formData = new FormData();
+    formData.append("audio", audioFile);
+
+    const response = await fetch(`${apiBaseUrl}/api/detect-audio`, {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(data.error || data.message || "Không thể xử lý file audio.");
+    }
+
+    setResult(data);
+
+    if (data.input_text) {
+      setText(data.input_text);
+    }
+  } catch (err) {
+    setError(err.message || "Lỗi khi quét audio.");
+  } finally {
+    setAudioLoading(false);
+  }
+};
 
   const handleSendReport = async () => {
     if (!result) return;
@@ -173,6 +235,58 @@ export default function ScanContent() {
             value={text}
             onChange={(e) => setText(e.target.value)}
           />
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".mp3,.wav,.m4a,.webm,audio/*"
+            onChange={handleFileChange}
+            onClick={(e) => {
+              e.target.value = null;
+            }}
+            style={{ display: "none" }}
+          />
+          <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <p className="font-bold text-slate-800 text-lg">
+                  Quét file audio (MP3 / WAV / M4A / WEBM)
+                </p>
+                <p className="text-slate-500 text-sm mt-1">
+                  Tải file ghi âm để chuyển thành text rồi quét lừa đảo.
+                </p>
+
+                {audioFile && (
+                  <p className="mt-3 text-sm font-semibold text-blue-700">
+                    Đã chọn: {audioFile.name}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={handleChooseFile}
+                  className="bg-slate-800 text-white py-3 px-5 rounded-xl font-bold flex items-center gap-2 hover:bg-slate-700 transition-all"
+                >
+                  <span className="material-symbols-outlined">upload_file</span>
+                  Chọn file audio
+                </button>
+
+                <button
+                  onClick={handleAudioScan}
+                  disabled={audioLoading}
+                  className={`bg-blue-600 text-white py-3 px-5 rounded-xl font-bold flex items-center gap-2 transition-all ${
+                    audioLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-blue-700"
+                  }`}
+                >
+                  <span className="material-symbols-outlined">
+                    {audioLoading ? "autorenew" : "graphic_eq"}
+                  </span>
+                  {audioLoading ? "Đang xử lý..." : "Quét file audio"}
+                </button>
+              </div>
+            </div>
+          </div>
 
           {error && (
             <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700 font-semibold">

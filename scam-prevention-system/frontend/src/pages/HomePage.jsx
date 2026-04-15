@@ -9,21 +9,99 @@ const HomePage = () => {
   const [textInput, setTextInput] = useState("");
   const [phoneInput, setPhoneInput] = useState("");
   const [bankAccount, setBankAccount] = useState("");
+  const [selectedBank, setSelectedBank] = useState("");
   const [audioFile, setAudioFile] = useState(null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
 
-  const API_BASE = useMemo(
-    () =>
-      (import.meta.env.VITE_API_BASE_URL || "http://localhost:5000").replace(
-        /\/$/,
-        "",
-      ),
-    [],
-  );
+  const API_BASE = useMemo(() => {
+    const base = import.meta.env.VITE_API_BASE_URL;
+    if (!base) console.warn("Missing API base URL");
+    return (base || "http://localhost:5000").replace(/\/$/, "");
+  }, []);
+  const handleBankScan = async () => {
+    try {
+      if (!bankAccount.trim() || !selectedBank) {
+        setError("Please enter your account number and select your bank.");
+        return;
+      }
 
+      if (!/^\d+$/.test(bankAccount)) {
+        setError("The account number must be a number.");
+        return;
+      }
+
+      setLoading(true);
+
+      const response = await fetch(`${API_BASE}/api/check-bank-account`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          bank_name: selectedBank,
+          account_number: bankAccount,
+        }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data.message || "Account verification error.");
+      }
+
+      setResult(data);
+    } finally {
+      setLoading(false);
+    }
+  };
+    const handleAudioScan = async () => {
+      try {
+        if (!audioFile) {
+          setError("Please select an audio file.");
+          return;
+        }
+
+        if (audioFile.size > 10 * 1024 * 1024) {
+          setError("The file is too large (>10MB)");
+          return;
+        }
+
+        const allowedTypes = [
+          "audio/mpeg",
+          "audio/wav",
+          "audio/mp4",
+          "audio/x-m4a"
+        ];
+
+        if (!allowedTypes.includes(audioFile.type)) {
+          setError("Invalid file!");
+          return;
+        }
+
+        setLoading(true);
+
+        const formData = new FormData();
+        formData.append("audio", audioFile);
+
+        const response = await fetch(`${API_BASE}/api/check-audio`, {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(data.message || "Audio test error!");
+        }
+
+        setResult(data);
+      } finally {
+        setLoading(false);
+      }
+    };
   const handleScan = async () => {
     setError("");
     setResult(null);
@@ -44,7 +122,7 @@ const HomePage = () => {
           },
           body: JSON.stringify({ text: textInput }),
         });
-
+    
         const data = await response.json().catch(() => ({}));
 
         if (!response.ok) {
@@ -86,16 +164,12 @@ const HomePage = () => {
       }
 
       if (activeTab === "bank") {
-        setError(
-          "Only text message and phone number checks are supported right now.",
-        );
+        await handleBankScan();
         return;
       }
 
       if (activeTab === "audio") {
-        setError(
-          "Only text message and phone number checks are supported right now.",
-        );
+        await handleAudioScan();
         return;
       }
 
@@ -108,6 +182,9 @@ const HomePage = () => {
       setLoading(false);
     }
   };
+
+
+
 
   const handleReportSender = () => {
     if (!result) return;
@@ -151,6 +228,7 @@ const HomePage = () => {
     }
     setError("");
     setResult(null);
+    setSelectedBank("");
   };
 
   const riskLevel = (result?.risk_level || "low").toLowerCase();
@@ -351,6 +429,19 @@ const HomePage = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           <div className="lg:col-span-7 bg-surface-container-lowest rounded-xl p-8 shadow-sm">
+            {error && (
+              <div className="mb-6 p-4 rounded-xl bg-red-50 border-2 border-red-300 text-red-800 font-medium">
+                <div className="flex items-start gap-3">
+                  <span
+                    className="material-symbols-outlined text-xl flex-shrink-0 mt-0.5"
+                    style={{ fontVariationSettings: "'FILL' 1" }}
+                  >
+                    error
+                  </span>
+                  <p>{error}</p>
+                </div>
+              </div>
+            )}
             <div className="mb-8">
               <label className="block text-sm font-bold text-primary mb-6 uppercase tracking-widest">
                 Input Analysis Field
@@ -456,19 +547,47 @@ const HomePage = () => {
 
               {activeTab === "bank" && (
                 <div>
+                  <select
+                    className="w-full p-4 mb-4 rounded-xl"
+                    value={selectedBank}
+                    onChange={(e) => setSelectedBank(e.target.value)}
+                  >
+                    <option value="">-- Select Bank --</option>
+                    <option value="Vietcombank">Vietcombank</option>
+                    <option value="Techcombank">Techcombank</option>
+                    <option value="BIDV">BIDV</option>
+                    <option value="MB Bank">MB Bank</option>
+                  </select>
+
                   <input
-                    className="w-full p-6 text-2xl bg-surface-container-highest border-none rounded-xl focus:ring-4 focus:ring-primary-fixed outline-none transition-all placeholder:text-outline font-bold"
+                    className="w-full p-6 text-2xl bg-surface-container-highest border-none rounded-xl"
                     placeholder="Enter bank account number..."
-                    type="text"
                     value={bankAccount}
                     onChange={(e) => setBankAccount(e.target.value)}
                   />
-                  <p className="mt-4 text-on-surface-variant text-base">
-                    We verify if the account has been flagged in recent
-                    fraudulent transfers.
-                  </p>
                 </div>
               )}
+  {activeTab === "audio" && (
+    <div>
+      <div
+        className="w-full p-12 bg-surface-container-highest border-4 border-dashed border-outline-variant rounded-xl flex flex-col items-center justify-center gap-4 text-center group cursor-pointer hover:bg-surface-container-high transition-colors"
+        onClick={() => document.getElementById("audioUpload").click()}
+      >
+        <span
+          className="material-symbols-outlined text-6xl text-outline group-hover:text-primary transition-colors"
+          data-icon="upload_file"
+        >
+          upload_file
+        </span>
+        <div>
+          <p className="text-xl font-bold text-on-surface">
+            Drag and drop audio file here
+          </p>
+          <p className="text-on-surface-variant mt-2">
+            Supports .mp3, .wav, .m4a (Max 10MB)
+          </p>
+        </div>
+      </div>
 
               {activeTab === "audio" && (
                 <div>
@@ -507,12 +626,13 @@ const HomePage = () => {
                 </div>
               )}
 
-              {error && (
-                <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700 font-semibold">
-                  {error}
-                </div>
-              )}
-            </div>
+      {audioFile && (
+        <p className="mt-4 text-sm text-green-600 text-center">
+          Selected: <span className="font-medium">{audioFile.name}</span>
+        </p>
+      )}
+    </div>
+  )}
 
             <button
               onClick={handleScan}
@@ -537,51 +657,54 @@ const HomePage = () => {
             </button>
           </div>
 
+          {/* Sidebar How it works */}
           <div className="lg:col-span-5 h-full">
-            <div className="bg-surface-container-low rounded-xl p-8 h-full flex flex-col justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-primary mb-6">
-                  How it works
-                </h2>
-                <ul className="space-y-6">
-                  <li className="flex gap-4">
-                    <span className="bg-primary-fixed text-primary w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center font-bold">
-                      1
-                    </span>
-                    <p className="text-lg text-on-surface-variant">
-                      Our AI scans for known phishing patterns and linguistic
-                      tricks used by fraudsters.
-                    </p>
-                  </li>
-                  <li className="flex gap-4">
-                    <span className="bg-primary-fixed text-primary w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center font-bold">
-                      2
-                    </span>
-                    <p className="text-lg text-on-surface-variant">
-                      We verify URLs and data against global databases of
-                      malicious activity.
-                    </p>
-                  </li>
-                  <li className="flex gap-4">
-                    <span className="bg-primary-fixed text-primary w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center font-bold">
-                      3
-                    </span>
-                    <p className="text-lg text-on-surface-variant">
-                      You receive a clear safety rating and step-by-step
-                      guidance.
-                    </p>
-                  </li>
-                </ul>
-              </div>
+            <aside className="sticky top-28">
+              <div className="bg-surface-container-low rounded-2xl p-8 h-full flex flex-col justify-between shadow-lg border border-primary/10">
+                <div>
+                  <h2 className="text-2xl font-bold text-primary mb-6 text-center lg:text-left">
+                    How it works
+                  </h2>
+                  <ul className="space-y-6">
+                    <li className="flex gap-4 items-center">
+                      <span className="bg-primary-fixed text-primary w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center font-bold">
+                        1
+                      </span>
+                      <p className="text-lg text-on-surface-variant">
+                        Our AI scans for known phishing patterns and linguistic
+                        tricks used by fraudsters.
+                      </p>
+                    </li>
+                    <li className="flex gap-4 items-center">
+                      <span className="bg-primary-fixed text-primary w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center font-bold">
+                        2
+                      </span>
+                      <p className="text-lg text-on-surface-variant">
+                        We verify URLs and data against global databases of
+                        malicious activity.
+                      </p>
+                    </li>
+                    <li className="flex gap-4 items-center">
+                      <span className="bg-primary-fixed text-primary w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center font-bold">
+                        3
+                      </span>
+                      <p className="text-lg text-on-surface-variant">
+                        You receive a clear safety rating and step-by-step
+                        guidance.
+                      </p>
+                    </li>
+                  </ul>
+                </div>
 
-              <div className="mt-12 rounded-xl overflow-hidden shadow-inner">
-                <img
-                  alt="close-up of hands holding a smartphone with safe checkmark"
-                  className="w-full h-48 object-cover"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUBN4OwRx3EWG3_WyEUo9sXDEaO9GatDXkYcwBfqI1_gjs4TdFB65MbXl3-Bw7K62gNKwjYY6a9LkA5etFskk92yLiPGwCHTS_nrUSOjWBmGPODNelxsQfY7lrnQC-1Bk-JuTYBIyqKjDomnf6hC4DOLyKcjnx0yNOj8j1d3ANA-3S__fX-A-B2eDoNxPGjkjI9jX9i19qQoiJH8zMBgaK7MGnbQFAm9jvOa80jlS-raCzIZVNRqUxYD-RrxxW8VyystlFMxboWLo"
-                />
+                <div className="mt-12 rounded-xl overflow-hidden shadow-inner">
+                  <img
+                    alt="close-up of hands holding a smartphone with safe checkmark"
+                    className="w-full h-48 object-cover"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUBN4OwRx3EWG3_WyEUo9sXDEaO9GatDXkYcwBfqI1_gjs4TdFB65MbXl3-Bw7K62gNKwjYY6a9LkA5etFskk92yLiPGwCHTS_nrUSOjWBmGPODNelxsQfY7lrnQC-1Bk-JuTYBIyqKjDomnf6hC4DOLyKcjnx0yNOj8j1d3ANA-3S__fX-A-B2eDoNxPGjkjI9jX9i19qQoiJH8zMBgaK7MGnbQFAm9jvOa80jlS-raCzIZVNRqUxYD-RrxxW8VyystlFMxboWLo"
+                  />
+                </div>
               </div>
-            </div>
+            </aside>
           </div>
         </div>
 
@@ -650,6 +773,11 @@ const HomePage = () => {
                   >
                     {result.message}
                   </p>
+                  {result.input_text && (
+                    <p className="text-sm mt-2">
+                      <b>Transcript:</b> {result.input_text}
+                    </p>
+                  )}
 
                   {isTextResult && result.input_text && (
                     <div
@@ -856,6 +984,7 @@ const HomePage = () => {
             <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
           </div>
         </section>
+        </div>
       </main>
 
       <footer className="bg-slate-100 dark:bg-slate-950 w-full py-12 px-8 mt-20">

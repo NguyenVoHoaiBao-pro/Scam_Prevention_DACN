@@ -4,10 +4,23 @@ import sqlite3
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from services.text_detector import analyze_text
+from flask import jsonify
+from datetime import datetime
+from flask_sqlalchemy import SQLAlchemy
+import os
 from services.phone_detector import analyze_phone
 
+from app.models.report import db
+
+
+# Cấu hình SQLite
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///scam_reports.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 CORS(app)
+db.init_app(app)
+with app.app_context():
+    db.create_all()
 
 AUTH_DB_PATH = os.path.join(os.path.dirname(__file__), "auth.db")
 
