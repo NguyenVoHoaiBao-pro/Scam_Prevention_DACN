@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../index.css';
+import Header from "../components/Header";
 
 const Awareness = () => {
   // 1. Quản lý trạng thái Like cho 4 bài viết
@@ -26,35 +27,7 @@ const Awareness = () => {
   return (
     <div className="bg-surface font-body text-on-surface min-h-screen">
       {/* TopNavBar */}
-      <nav className="bg-white/80 backdrop-blur-xl flex justify-between items-center w-full px-6 h-20 shadow-sm sticky top-0 z-50">
-        <div className="flex items-center gap-8">
-          <Link to="/" className="text-2xl font-extrabold text-primary font-headline tracking-tight">
-            Fraud Scanner AI
-          </Link>
-          <div className="hidden md:flex gap-6 items-center">
-            <Link to="/scan" className="text-on-surface-variant font-headline font-bold hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors">
-              Scan Content
-            </Link>
-            <Link to="/scam-report" className="text-on-surface-variant font-headline font-bold hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors">
-              Report Scam
-            </Link>
-            <Link to="/awareness" className="text-primary border-b-4 border-primary font-headline font-bold px-3 py-2">
-              Awareness Hub
-            </Link>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => window.location.href = '/login'}
-            className="text-primary"
-          >
-            <span className="material-symbols-outlined text-primary text-3xl cursor-pointer">
-              account_circle
-            </span>
-          </button>
-        </div>
-      </nav>
+      <Header />
 
       <main className="max-w-4xl mx-auto px-6 py-12">
         <header className="mb-16">

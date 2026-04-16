@@ -375,9 +375,11 @@ def create_report():
             "message": "Report saved successfully",
             "data": report
         }), 201
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
-    
+    except sqlite3.IntegrityError:
+        return jsonify({
+            "status": "duplicate",
+            "message": "Report already exists"
+        }), 200
 # ==========================================
 # LOAD AI MODEL
 # ==========================================
@@ -519,11 +521,16 @@ def handle_warnings():
         cursor = connection.cursor()
 
         if request.method == "POST":
-            data = request.get_json(silent=True) or {}
-            title = (data.get("title") or "").strip()
-            content = (data.get("content") or "").strip()
-            risk_level = (data.get("risk_level") or "High").strip() or "High"
-
+            if request.form:
+                title = (request.form.get("title") or "").strip()
+                content = (request.form.get("description") or "").strip()
+                risk_level = (request.form.get("risk_level") or "High").strip()
+            else:
+                data = request.get_json(silent=True) or {}
+                title = (data.get("title") or "").strip()
+                content = (data.get("content") or "").strip()
+                risk_level = (data.get("risk_level") or "High").strip() or "High"
+                
             if not title or not content:
                 return jsonify({
                     "status": "error",
@@ -620,3 +627,4 @@ def check_audio():
             "success": False,
             "message": f"Server error: {str(e)}"
         }), 500
+    

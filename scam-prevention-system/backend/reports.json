@@ -1,82 +1,32 @@
 [
   {
-    "id": 1775704146,
-    "title": "Danger! Potential Fraud Alert.",
-    "description": "This message mimics a bank notification and contains common phishing signatures often used to steal login credentials.",
-    "scam_type": "phone",
-    "reporter_name": "Community User",
-    "email": null,
-    "created_at": "2026-04-09T10:09:06.807475",
-    "evidence": null
-  },
-  {
-    "id": 1775704147,
-    "title": "Danger! Potential Fraud Alert.",
-    "description": "This message mimics a bank notification and contains common phishing signatures often used to steal login credentials.",
-    "scam_type": "phone",
-    "reporter_name": "Community User",
-    "email": null,
-    "created_at": "2026-04-09T10:09:07.113046",
-    "evidence": null
-  },
-  {
-    "id": 1775749049,
-    "title": "Analysis Completed",
-    "description": "N\u1ed9i dung nghi ng\u1edd: dfsksnfsjfs vsksv \r\n\r\n\u0110\u00e1nh gi\u00e1 AI: V\u0103n b\u1ea3n an to\u00e0n, kh\u00f4ng c\u00f3 d\u1ea5u hi\u1ec7u l\u1eeba \u0111\u1ea3o.",
-    "scam_type": "text",
-    "reporter_name": "Community User",
-    "email": null,
-    "created_at": "2026-04-09T22:37:29.336327",
-    "evidence": null
-  },
-  {
-    "id": 1776245700,
-    "title": "Analysis Completed",
-    "description": "N\u1ed9i dung nghi ng\u1edd: undefined\r\n\r\n\u0110\u00e1nh gi\u00e1 AI: Ph\u00e1t hi\u1ec7n n\u1ed9i dung c\u00f3 d\u1ea5u hi\u1ec7u l\u1eeba \u0111\u1ea3o!",
-    "scam_type": "text",
-    "reporter_name": "Community User",
-    "email": null,
-    "created_at": "2026-04-15T16:35:00.201367",
-    "evidence": null
-  },
-  {
-    "id": 1776245700,
-    "title": "Analysis Completed",
-    "description": "N\u1ed9i dung nghi ng\u1edd: undefined\r\n\r\n\u0110\u00e1nh gi\u00e1 AI: Ph\u00e1t hi\u1ec7n n\u1ed9i dung c\u00f3 d\u1ea5u hi\u1ec7u l\u1eeba \u0111\u1ea3o!",
-    "scam_type": "text",
-    "reporter_name": "Community User",
-    "email": null,
-    "created_at": "2026-04-15T16:35:00.210073",
-    "evidence": null
-  },
-  {
-    "id": 1776253602,
+    "id": 1776326465,
     "title": "Warning! Suspicious Content Detected.",
-    "description": "N\u1ed9i dung nghi ng\u1edd: undefined\r\n\r\n\u0110\u00e1nh gi\u00e1 AI: This message contains some suspicious signs and should be reviewed carefully.",
+    "description": "N\u1ed9i dung c\u1ea3nh b\u00e1o: Anh \u0111ang g\u1eb7p s\u1ef1 c\u1ed1 kh\u1ea9n c\u1ea5p, \u0111i\u1ec7n tho\u1ea1i kh\u00f4ng d\u00f9ng \u0111\u01b0\u1ee3c. Em h\u00e3y chuy\u1ec3n ngay 5 tri\u1ec7u v\u00e0o s\u1ed1 t\u00e0i kho\u1ea3n n\u00e0y \u0111\u1ec3 gi\u00fap anh, anh s\u1ebd tr\u1ea3 l\u1ea1i sau.\r\n\r\n                        === K\u1ebeT QU\u1ea2 PH\u00c2N T\u00cdCH AI ===\r\n                        This message contains some suspicious signs and should be reviewed carefully.\r\n\r\n                        Risk Score: 49 / 100\r\n                        Risk Level: medium\r\n                        Suspicious patterns: t\u00e0i kho\u1ea3n, kh\u1ea9n c\u1ea5p, ngay, urgent_language\r\n                        Recommendation: Do not click any links, do not share OTPs or passwords, and verify through official channels.\r\n\r\n                        Engine: hybrid_rule_ml_v1",
     "scam_type": "text",
-    "reporter_name": "Community User",
+    "reporter_name": "Anonymous User",
     "email": null,
-    "created_at": "2026-04-15T18:46:42.202602",
+    "created_at": "2026-04-16T15:01:05.061626",
     "evidence": null
   },
   {
-    "id": 1776255412,
+    "id": 1776327415,
     "title": "Warning! Suspicious Content Detected.",
-    "description": "N\u1ed9i dung nghi ng\u1edd: undefined\r\n\r\n\u0110\u00e1nh gi\u00e1 AI: Suspicious content suspected of being fraudulent!",
+    "description": "N\u1ed9i dung c\u1ea3nh b\u00e1o: Xin ch\u00fac m\u1eebng! B\u1ea1n \u0111\u00e3 tr\u00fang th\u01b0\u1edfng 100.000 USD trong ch\u01b0\u01a1ng tr\u00ecnh quay s\u1ed1 may m\u1eafn. \u0110\u1ec3 nh\u1eadn gi\u1ea3i, vui l\u00f2ng cung c\u1ea5p th\u00f4ng tin c\u00e1 nh\u00e2n v\u00e0 chuy\u1ec3n kho\u1ea3n ph\u00ed x\u1eed l\u00fd 200 USD.\r\n\r\n                        === K\u1ebeT QU\u1ea2 PH\u00c2N T\u00cdCH AI ===\r\n                        This message contains some suspicious signs and should be reviewed carefully.\r\n\r\n                        Risk Score: 51 / 100\r\n                        Risk Level: medium\r\n                        Suspicious patterns: tr\u00fang th\u01b0\u1edfng, chuy\u1ec3n kho\u1ea3n\r\n                        Recommendation: Do not click any links, do not share OTPs or passwords, and verify through official channels.\r\n\r\n                        Engine: hybrid_rule_ml_v1",
+    "scam_type": "text",
+    "reporter_name": "Anonymous User",
+    "email": null,
+    "created_at": "2026-04-16T15:16:55.441314",
+    "evidence": null
+  },
+  {
+    "id": 1776330635,
+    "title": "Warning! Suspicious Content Detected.",
+    "description": "N\u1ed9i dung c\u1ea3nh b\u00e1o: test1.mp3\r\n\r\n                        === K\u1ebeT QU\u1ea2 PH\u00c2N T\u00cdCH AI ===\r\n                        Suspicious content suspected of being fraudulent!\r\n\r\n                        Risk Score: 50 / 100\r\n                        Risk Level: medium\r\n                        Suspicious patterns: otp, bank\r\n                        Recommendation: Do not provide OTP or transfer money.\r\n\r\n                        Engine: Whisper + rule-based",
     "scam_type": "audio",
-    "reporter_name": "Community User",
+    "reporter_name": "Anonymous User",
     "email": null,
-    "created_at": "2026-04-15T19:16:52.418504",
-    "evidence": null
-  },
-  {
-    "id": 1776255412,
-    "title": "Warning! Suspicious Content Detected.",
-    "description": "N\u1ed9i dung nghi ng\u1edd: undefined\r\n\r\n\u0110\u00e1nh gi\u00e1 AI: Suspicious content suspected of being fraudulent!",
-    "scam_type": "audio",
-    "reporter_name": "Community User",
-    "email": null,
-    "created_at": "2026-04-15T19:16:52.732176",
+    "created_at": "2026-04-16T16:10:35.049881",
     "evidence": null
   }
 ]

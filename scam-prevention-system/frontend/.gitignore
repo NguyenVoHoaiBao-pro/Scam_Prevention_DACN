@@ -38,4 +38,4 @@ config.json
 *.njsproj
 *.sln
 *.sw?
-scam-prevention-system/backend/config.json
+scam-prevention-system/backend/config.json  

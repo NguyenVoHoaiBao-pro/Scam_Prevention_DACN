@@ -1,6 +1,7 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import '../styles.css';
+import Header from "../components/Header";
 
 export default function CommunityScamReport() {
     const location = useLocation();
@@ -18,7 +19,7 @@ export default function CommunityScamReport() {
         () => (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000').replace(/\/$/, ''),
         []
     );
-
+/*
     useEffect(() => {
         const fetchWarnings = async () => {
             try {
@@ -39,23 +40,41 @@ export default function CommunityScamReport() {
         };
 
         fetchWarnings();
-    }, []);
-    // 2. Fetch API dữ liệu từ Backend (Đã sửa lại để dùng SQLite)
+    }, []);*/
+    // Fetch API dữ liệu từ Backend (Đã sửa lại để dùng SQLite)
+        const hasSavedRef = useRef(false);
+
         useEffect(() => {
+            
             // Tự động lưu report mới vào SQLite nếu có data từ trang Scan truyền sang và chưa được lưu
             const autoSaveReport = async () => {
                 // Kiểm tra xem có data từ trang scan truyền sang không và chưa được lưu
-                if (reportData && !reportData.isSaved) {
+                 if (!reportData || hasSavedRef.current) return;
+
+                hasSavedRef.current = true; // Đánh dấu đã lưu để tránh gửi API nhiều lần khi component re-render           
+               // if (reportData && !reportData.isSaved) {
                     try {
                         // Backend dùng request.form, nên phải tạo FormData thay vì JSON
                         const formData = new FormData();
-                        formData.append('title', reportData.reportContent?.title || 'Cảnh báo lừa đảo mới');
-                        const combinedDescription = `Nội dung nghi ngờ: ${reportData.userInput}\n\nĐánh giá AI: ${reportData.reportContent?.description || ''}`;
-                        formData.append('description', combinedDescription);
-                        //formData.append('description', reportData.message || reportData.reportContent?.description || 'Không có nội dung');
-                        formData.append('scam_type', reportData.type || 'Unknown');
-                        formData.append('reporter_name', 'Community User'); // Có thể thay bằng tên user nếu đã đăng nhập
+                        formData.append('title', reportData.reportContent?.title || 'Báo cáo từ AI Scan');
+                        const fullDescription = `
+                        Nội dung cảnh báo: ${reportData.userInput || 'Không có'}
 
+                        === KẾT QUẢ PHÂN TÍCH AI ===
+                        ${reportData.reportContent?.description || ''}
+
+                        Risk Score: ${reportData.reportContent?.riskScore || '--'} / 100
+                        Risk Level: ${reportData.reportContent?.riskLevel || 'low'}
+                        Suspicious patterns: ${reportData.reportContent?.suspicious?.join(', ') || 'Không phát hiện'}
+                        Recommendation: ${reportData.reportContent?.recommendation || 'Không có khuyến nghị'}
+
+                        Engine: ${reportData.reportContent?.engine || 'Unknown'}
+                            `.trim();
+
+                            formData.append('description', fullDescription);
+                            formData.append('scam_type', reportData.type || 'AI_Scan');
+                            formData.append('reporter_name', 'Anonymous User');   // tên user thật
+                           // formData.append('email', ''); // nếu có đăng nhập thì truyền vào
                         const response = await fetch('http://localhost:5000/api/report', {
                             method: 'POST',
                             body: formData,
@@ -70,7 +89,7 @@ export default function CommunityScamReport() {
                     } catch (err) {
                         console.error('Lỗi kết nối khi lưu report:', err);
                     }
-                }
+                //};
             };
 
             // Lấy danh sách report mới nhất từ SQLite
@@ -78,11 +97,11 @@ export default function CommunityScamReport() {
                 try {
                    
                     const response = await fetch('http://localhost:5000/api/reports');
-                    if (!response.ok) throw new Error('Lỗi khi kết nối đến máy chủ');
+                    if (!response.ok) throw new Error('Unable to retrieve the report list.');
 
-                    const result = await response.json();
+                    const data = await response.json();
                     // Vì API /api/reports trả về trực tiếp một mảng (array), không bọc trong result.data
-                    setWarnings(result); 
+                    setWarnings(data); 
                     
                 } catch (err) {
                     setError(err.message);
@@ -104,57 +123,34 @@ export default function CommunityScamReport() {
             [id]: !prev[id],
         }));
     };
+    const parseReportFromDB = (report) => {
+    const desc = report.description || '';
 
+    const getValue = (label) => {
+        const regex = new RegExp(label + ":\\s*(.*)");
+        const match = desc.match(regex);
+        return match ? match[1].trim() : '';
+    };
+
+    return {
+        userInput: desc.match(/Nội dung cảnh báo:(.*?)===/s)?.[1]?.trim() || '',
+        reportContent: {
+            title: report.title,
+            description: desc.match(/=== KẾT QUẢ PHÂN TÍCH AI ===([\\s\\S]*?)Risk Score:/)?.[1]?.trim() || '',
+            riskScore: getValue('Risk Score'),
+            riskLevel: getValue('Risk Level') || 'low',
+            suspicious: getValue('Suspicious patterns')?.split(',').map(i => i.trim()) || [],
+            recommendation: getValue('Recommendation'),
+        }
+    };
+};
     const handleGoToScan = () => {
         navigate('/scan');
     };
 
     return (
     <div className="bg-surface text-on-surface selection:bg-primary-fixed min-h-screen">
-        <nav className="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm">
-            <div className="flex justify-between items-center w-full px-8 py-6 max-w-screen-2xl mx-auto h-20">
-                <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-blue-900 dark:text-blue-100 text-3xl" data-icon="shield">
-                        shield
-                    </span>
-                    <div className="text-3xl font-extrabold tracking-tight text-primary">
-                        Fraud Scanner AI
-                    </div>
-                </div>
-
-                <div className="hidden md:flex items-center gap-12">
-                    <a
-                        className="text-slate-600 dark:text-slate-400 font-medium hover:text-blue-700 dark:hover:text-blue-200 transition-colors uppercase tracking-wide text-sm"
-                        href="/scan"
-                    >
-                        Scan Content
-                    </a>
-                    <a
-                        className="text-blue-800 dark:text-blue-300 font-bold border-b-4 border-blue-800 dark:border-blue-300 pb-1 uppercase tracking-wide text-sm"
-                        href="/scam-report"
-                    >
-                        Report Scam
-                    </a>
-                    <a
-                        className="text-slate-600 dark:text-slate-400 font-medium hover:text-blue-700 dark:hover:text-blue-200 transition-colors uppercase tracking-wide text-sm"
-                        href="/awareness"
-                    >
-                        Awareness Hub
-                    </a>
-                </div>
-
-                <div className="flex items-center gap-6">
-                    <button
-                        onClick={() => (window.location.href = '/login')}
-                        className="text-slate-600 dark:text-slate-400 hover:text-blue-900 transition-colors"
-                    >
-                        <span className="material-symbols-outlined text-3xl" data-icon="account_circle">
-                            account_circle
-                        </span>
-                    </button>
-                </div>
-            </div>
-        </nav>
+        <Header />
 
         <main className="pt-32 pb-24 px-6 md:px-12 max-w-screen-2xl mx-auto min-h-screen">
             <header className="mb-16">
@@ -181,7 +177,7 @@ export default function CommunityScamReport() {
                         </div>
                     )}
 
-                    {/* Phần hiển thị reportData đơn lẻ (nếu có) */}
+                    {/* Phần hiển thị reportData đơn lẻ */}
                     {reportData && (
                         <article className="bg-surface-container-lowest rounded-3xl p-8 md:p-10 shadow-sm border border-outline-variant/30 mb-12">
                             <div className="flex items-center justify-between mb-8">
@@ -255,7 +251,7 @@ export default function CommunityScamReport() {
                                             </span>
                                             <div className="text-left">
                                                 <h4 className="font-bold text-xl text-error uppercase">
-                                                    AI Verdict: High Risk
+                                                    AI Verdict: {reportData.reportContent.riskLevel?.toUpperCase()}
                                                 </h4>
                                                 <p className="text-on-surface-variant text-sm mt-1">
                                                     Click to view detailed AI analysis
@@ -275,15 +271,20 @@ export default function CommunityScamReport() {
                                                 <h3 className="text-2xl font-black text-error">
                                                     {reportData.reportContent.title}
                                                 </h3>
-                                                <span className="bg-error text-white px-4 py-2 rounded-full font-bold">
-                                                    Risk {reportData.reportContent.riskScore}%
-                                                </span>
+                                               <div className="grid grid-cols-2 gap-6 text-sm">
+                                                <div>
+                                                    <strong>Risk Score:</strong> {reportData.reportContent.riskScore} / 100
+                                                </div>
+                                                <div>
+                                                    <strong>Risk Level:</strong> <span className="font-bold text-error">{reportData.reportContent.riskLevel?.toUpperCase()}</span>
+                                                </div>
+                                                </div> 
                                             </div>
 
                                             <p className="text-lg text-on-surface-variant mb-6 leading-relaxed">
                                                 {reportData.reportContent.description}
                                             </p>
-
+                                            
                                             {Array.isArray(reportData.reportContent.suspicious) &&
                                                 reportData.reportContent.suspicious.length > 0 && (
                                                     <div className="mb-6">
@@ -337,10 +338,13 @@ export default function CommunityScamReport() {
                     )}
 
                     {/* Danh sách warnings từ database */}
-                    {!loading && !error && warnings.map((warning, index) => {
-                        const riskLevel = warning.risk_level || 'High';
+                    {!loading && !error && warnings.map((report, index) => {
+
+                        const riskLevel = report.risk_level || report.reportContent?.riskLevel || 'low';
                         const isHighRisk = riskLevel.toLowerCase() === 'high';
-                        const isLiked = likedItems[warning.id];
+                        const isLiked = likedItems[report.id];
+                        // Làm sạch description (loại bỏ comment thừa và xuống dòng)
+                        const parsed = parseReportFromDB(report);
 
                         const avatarColors = [
                             "bg-primary-container text-on-primary-container",
@@ -348,10 +352,10 @@ export default function CommunityScamReport() {
                             "bg-tertiary-container text-on-tertiary"
                         ];
                         const avatarBg = avatarColors[index % 3];
-
+                       // const aiContent = report.reportContent || report;
                         return (
                             <article
-                                key={warning.id}
+                                key={report.id}
                                 className="bg-surface-container-lowest rounded-3xl p-8 md:p-10 shadow-sm transition-all hover:shadow-md border border-outline-variant/30"
                             >
                                 <div className="flex items-center justify-between mb-8">
@@ -365,7 +369,7 @@ export default function CommunityScamReport() {
                                         <div>
                                             <div className="flex items-center gap-3 flex-wrap">
                                                 <span className="text-xl font-bold text-on-surface">
-                                                    Community_Guardian_{warning.id}
+                                                    Community_Guardian_{report.id}
                                                 </span>
                                                 <span className={`px-3 py-0.5 rounded-full text-sm font-semibold flex items-center gap-1 ${isHighRisk ? 'bg-tertiary-fixed text-on-tertiary-fixed' : 'bg-primary-fixed text-on-primary-fixed'}`}>
                                                     <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>
@@ -375,7 +379,7 @@ export default function CommunityScamReport() {
                                                 </span>
                                             </div>
                                             <p className="text-on-surface-variant text-base">
-                                                Reported {warning.created_at}
+                                                Reported {new Date(report.created_at).toLocaleString('vi-VN')}
                                             </p>
                                         </div>
                                     </div>
@@ -383,34 +387,62 @@ export default function CommunityScamReport() {
 
                                 {/* Reported Message Content */}
                                 <div className="mb-8">
+                                    
                                     <h3 className="text-on-surface-variant font-semibold text-sm uppercase tracking-widest mb-4">
                                         Reported Message Content
                                     </h3>
                                     <div className="bg-surface-container-highest p-6 rounded-2xl border-l-8 border-primary">
                                         <p className="text-xl md:text-2xl text-on-surface font-medium italic leading-snug">
-                                            "{warning.title || warning.content || 'No message content available.'}"
+                                            "{parsed.userInput || 'No message content'}"
                                         </p>
                                     </div>
                                 </div>
 
                                 {/* AI Verdict */}
-                                <div className={`mb-8 p-6 rounded-2xl border-2 fraud-pulse flex gap-4 ${isHighRisk ? 'border-error bg-error-container/10' : 'border-orange-500 bg-orange-500/10'}`}>
-                                    <span className={`material-symbols-outlined text-3xl ${isHighRisk ? 'text-error' : 'text-orange-500'}`} style={{ fontVariationSettings: "'FILL' 1" }}>
-                                        warning
-                                    </span>
-                                    <div>
-                                        <h4 className={`font-bold text-xl mb-1 uppercase font-headline ${isHighRisk ? 'text-error' : 'text-orange-500'}`}>
-                                            AI Verdict: {riskLevel} Risk
-                                        </h4>
-                                        <p className="text-on-surface text-lg leading-relaxed">
-                                            {warning.description || warning.content}
-                                        </p>
+                                <div className={`mb-8 p-6 rounded-2xl border-2 ${isHighRisk ? 'border-error bg-error-container/10' : 'border-amber-500 bg-amber-500/10'}`}>
+                                 <h4 className="font-bold text-xl text-error">AI Analysis Result</h4>
+                                <div className="flex items-center justify-between flex-wrap gap-4 mt-6 mb-4">
+                               
+                                    <h3 className="text-2xl font-black text-error">
+                                        {parsed.reportContent.title}</h3>
+                                    <div className="grid grid-cols-2 gap-6 text-sm">
+                                        <div>
+                                            <strong>Risk Score:</strong> {parsed.reportContent.riskScore || '50'} 
+                                            </div>
+                                            <div>
+                                            <strong>Risk Level:</strong> <span className="font-bold text-error">{parsed.reportContent.riskLevel?.toUpperCase()}</span>
+                                        </div>
                                     </div>
                                 </div>
 
+                                <p className="text-on-surface leading-relaxed mb-6">
+                                    {parsed.reportContent.description}
+                                </p>
+                                {/* Suspicious Elements */}
+                                {parsed.reportContent.suspicious && parsed.reportContent.suspicious.length > 0 && (
+                                        <div className="mb-6">
+                                            <h5 className="font-semibold mb-3">Suspicious Elements</h5>
+                                            <div className="flex flex-wrap gap-2">
+                                                {parsed.reportContent.suspicious.map((item, i) => (
+                                                    <span key={i} className="bg-error-container text-error px-4 py-1 rounded-xl text-sm font-medium">
+                                                        {item}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Recommendation */}
+                                    <div className="bg-white/70 p-5 rounded-2xl">
+                                        <h5 className="font-bold text-primary mb-2">Recommendation</h5>
+                                        <p className="text-on-surface">
+                                            {parsed.reportContent.recommendation}
+                                        </p>
+                                    </div>
+                                </div>
                                 {/* Helpful Button */}
                                 <button
-                                    onClick={() => handleToggleLike(warning.id)}
+                                    onClick={() => handleToggleLike(report.id)}
                                     className={`w-full flex items-center justify-center gap-4 py-5 transition-all rounded-2xl font-bold text-lg active:scale-95 ${
                                         isLiked
                                             ? 'bg-primary text-white shadow-md'

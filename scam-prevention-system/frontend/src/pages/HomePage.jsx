@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../HomePage.css";
-
+import Header from "../components/Header";
 const HomePage = () => {
   const navigate = useNavigate();
 
@@ -196,23 +196,35 @@ const HomePage = () => {
         activeTab === "phone"
           ? result.display_phone || result.input_phone || phoneInput
           : activeTab === "bank"
-            ? bankAccount
-            : "Unknown Sender",
-      message:
-        activeTab === "text"
+          ? bankAccount
+          : activeTab === "audio"
+          ? "Audio Recording"
+          : "Unknown Sender",
+        userInput: activeTab === "text"
           ? textInput
           : activeTab === "phone"
-            ? `Phone number checked: ${result.display_phone || result.input_phone || phoneInput}`
-            : result?.message || "",
+          ? phoneInput
+          : activeTab === "audio"
+          ? audioFile?.name || "Audio file"
+          : bankAccount,
+      message: result.message || "",
+      // Truyền TOÀN BỘ kết quả phân tích AI
       reportContent: {
         title: resultTitle,
         description: result.message || "",
         suspicious: result.matched_patterns || [],
         recommendation: result.recommendation || "",
         riskScore: result.risk_score ?? null,
-        level: result.risk_level || "low",
+        riskLevel: result.risk_level || "low",
+        engine: result.engine,
+        ruleScore: result.rule_score,
+        //mlProbability: result.ml_probability,
+        inputText: result.input_text || result.input_phone || "",
+        isScam: result.is_scam || false,
       },
-    };
+
+    isSaved: false,        // cờ để trang report biết chưa lưu
+  };
 
     navigate("/scam-report", {
       state: senderInfo,
@@ -345,72 +357,7 @@ const HomePage = () => {
 
   return (
     <div className="bg-surface selection:bg-primary-fixed selection:text-on-primary-fixed min-h-screen text-on-surface">
-      <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm docked full-width top-0 sticky z-50">
-        <nav className="flex justify-between items-center w-full px-8 py-6 max-w-screen-2xl mx-auto">
-          <div className="flex items-center gap-3">
-            <span
-              className="material-symbols-outlined text-3xl text-primary"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              shield
-            </span>
-            <span className="text-2xl font-black text-blue-900 dark:text-blue-50 tracking-tight">
-              Fraud Scanner AI
-            </span>
-          </div>
-
-          <div className="hidden md:flex items-center gap-10">
-            <Link
-              className="font-['Public_Sans'] font-bold text-lg text-blue-900 dark:text-blue-400 border-b-4 border-blue-900 dark:border-blue-400 pb-2"
-              to="/"
-            >
-              Scan Text
-            </Link>
-            <Link
-              className="font-['Public_Sans'] font-bold text-lg text-slate-600 dark:text-slate-400 hover:text-blue-800 pb-2 transition-colors"
-              to="/scam-report"
-            >
-              Report Scam
-            </Link>
-            <Link
-              className="font-['Public_Sans'] font-bold text-lg text-slate-600 dark:text-slate-400 hover:text-blue-800 pb-2 transition-colors"
-              to="/awareness"
-            >
-              Awareness Hub
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <button className="p-3 rounded-full hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-blue-900 dark:text-blue-100">
-              <span
-                className="material-symbols-outlined text-2xl"
-                data-icon="help"
-              >
-                help
-              </span>
-            </button>
-            <button className="p-3 rounded-full hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-blue-900 dark:text-blue-100">
-              <span
-                className="material-symbols-outlined text-2xl"
-                data-icon="settings"
-              >
-                settings
-              </span>
-            </button>
-            <button
-              onClick={() => (window.location.href = "/login")}
-              className="p-3 rounded-full hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-blue-900 dark:text-blue-100"
-            >
-              <span
-                className="material-symbols-outlined text-2xl"
-                data-icon="person"
-              >
-                person
-              </span>
-            </button>
-          </div>
-        </nav>
-      </header>
+      <Header />
 
       <main className="max-w-screen-xl mx-auto px-8 py-12 md:py-20">
         <section className="mb-16">

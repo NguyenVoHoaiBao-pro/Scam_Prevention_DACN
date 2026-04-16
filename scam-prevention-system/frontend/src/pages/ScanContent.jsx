@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles.css";
+import Header from "../components/Header";
 
 export default function ScanContent() {
   const navigate = useNavigate();
@@ -163,59 +164,7 @@ const handleAudioScan = async () => {
 
   return (
     <div className="bg-surface text-on-surface selection:bg-primary-fixed min-h-screen flex flex-col">
-      <nav className="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm">
-        <div className="flex justify-between items-center w-full px-8 py-6 max-w-screen-2xl mx-auto h-20">
-          <div className="flex items-center gap-2">
-            <span
-              className="material-symbols-outlined text-blue-900 dark:text-blue-100 text-3xl"
-              data-icon="shield"
-            >
-              shield
-            </span>
-            <div
-              className="text-3xl font-extrabold tracking-tight text-primary cursor-pointer"
-              onClick={() => navigate("/")}
-            >
-              Fraud Scanner AI
-            </div>
-          </div>
-
-          <div className="hidden md:flex items-center gap-12">
-            <button
-              className="text-blue-800 dark:text-blue-300 font-bold border-b-4 border-blue-800 dark:border-blue-300 pb-1 uppercase tracking-wide text-sm"
-              onClick={() => navigate("/scan")}
-            >
-              Scan Content
-            </button>
-            <button
-              className="text-slate-600 dark:text-slate-400 font-medium hover:text-blue-700 dark:hover:text-blue-200 transition-colors uppercase tracking-wide text-sm"
-              onClick={() => navigate("/scam-report")}
-            >
-              Report Scam
-            </button>
-            <a
-              className="text-slate-600 dark:text-slate-400 font-medium hover:text-blue-700 dark:hover:text-blue-200 transition-colors uppercase tracking-wide text-sm"
-              href="/awareness"
-            >
-              Awareness Hub
-            </a>
-          </div>
-
-          <div className="flex items-center gap-6">
-            <button
-              onClick={() => (window.location.href = "/login")}
-              className="text-slate-600 dark:text-slate-400 hover:text-blue-900 transition-colors"
-            >
-              <span
-                className="material-symbols-outlined text-3xl"
-                data-icon="account_circle"
-              >
-                account_circle
-              </span>
-            </button>
-          </div>
-        </div>
-      </nav>
+      <Header />
 
       <main className="flex-grow pt-32 pb-24 px-6 md:px-12 max-w-4xl mx-auto w-full">
         <header className="mb-12 text-center">
