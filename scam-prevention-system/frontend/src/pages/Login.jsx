@@ -40,13 +40,14 @@ function Login() {
       if (!response.ok) {
         throw new Error(result.error || "Login failed. Please try again.");
       }
-
+/*
       if (rememberMe) {
         localStorage.setItem("authUser", JSON.stringify(result.user || {}));
       } else {
         localStorage.removeItem("authUser");
-      }
+      }*/
 
+      localStorage.setItem("authUser", JSON.stringify(result.user));
       setSuccessMessage(result.message || "Login successful");
       navigate("/");
     } catch (error) {

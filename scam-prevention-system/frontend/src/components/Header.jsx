@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 
+import { useState} from "react";
 export default function Header() {
     const location = useLocation(); // lấy đường dẫn hiện tại
 
@@ -7,6 +8,11 @@ export default function Header() {
 
     const baseClass =
         "font-['Public_Sans'] font-bold text-lg pb-2 transition-colors";
+    const [isOpen, setIsOpen] = useState(false);
+    const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem("authUser");
+    return savedUser ? JSON.parse(savedUser) : null;
+});
   return (
         <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm docked full-width top-0 sticky z-50">
                 <nav className="flex justify-between items-center w-full px-8 py-6 max-w-screen-2xl mx-auto">
@@ -72,19 +78,53 @@ export default function Header() {
                         settings
                       </span>
                     </button>
+                <div className="relative">
+                {user ? (
+                    <>
+                    {/* Avatar + username */}
                     <button
-                      onClick={() => (window.location.href = "/login")}
-                      className="p-3 rounded-full hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-blue-900 dark:text-blue-100"
+                        onClick={() => setIsOpen(!isOpen)}
+                        className="flex items-center gap-2 p-2 rounded-full hover:bg-slate-50 dark:hover:bg-slate-800 transition"
                     >
-                      <span
-                        className="material-symbols-outlined text-2xl"
-                        data-icon="person"
-                      >
-                        person
-                      </span>
+                        <img
+                        src={`https://ui-avatars.com/api/?name=${user.username}`}
+                        alt="avatar"
+                        className="w-8 h-8 rounded-full"
+                        />
+                        <span className="font-semibold text-sm text-blue-900 dark:text-white">
+                        {user.username}
+                        </span>
                     </button>
-                  </div>
-                </nav>
-              </header>
+
+                {/* Dropdown */}
+                {isOpen && (
+                    <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-slate-800 shadow-lg rounded-lg overflow-hidden z-50">
+                    <button
+                        onClick={() => {
+                        localStorage.removeItem("authUser");
+                        setUser(null);
+                        setIsOpen(false);
+                                    }}
+                                    className="w-full text-left px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700"
+                                >
+                                    Logout
+                                </button>
+                                </div>
+                            )}
+                            </>
+                        ) : (
+                            <button
+                            onClick={() => (window.location.href = "/login")}
+                            className="p-3 rounded-full hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-blue-900 dark:text-blue-100"
+                            >
+                            <span className="material-symbols-outlined text-2xl">
+                                person
+                            </span>
+                            </button>
+                        )}
+                </div>
+                </div>
+            </nav>
+     </header>
   );
 }
